@@ -31,7 +31,7 @@ O **School Buzzer** é um sistema eletrônico inteligente desenvolvido para auto
 - [x] Protoboard / Fenolite / Jumpers
 
 ### 💻 Software
-- 🔧 **Firmware em C++**
+- 🔧 **Firmware em C++:** ESP8266 
 - 🌐 **Painel Web:** HTML, CSS, JavaScript
 - 🔙 **Back-End:** Python (Django)
 - 🗃️ **Banco de Dados:** SQLite3
