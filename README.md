@@ -2,8 +2,6 @@
 
 **Campainha automática inteligente para escolas — programável via Web, com atualização OTA e controle em tempo real.**
 
-![school-buzzer-banner](https://via.placeholder.com/800x200?text=School+Buzzer)
-
 ---
 
 ## 🚀 Sobre o Projeto
@@ -21,8 +19,6 @@ O **School Buzzer** é um sistema eletrônico inteligente desenvolvido para auto
 - 📱 **Painel de controle responsivo** (mobile e desktop)
 - 📋 **Log de eventos**: registro de toques emitidos
 - 🔘 **Modo manual** para toques instantâneos
-- 📲 **Integração opcional com WhatsApp/App** para notificações de horários especiais
-
 ---
 
 ## 🧠 Tecnologias Utilizadas
@@ -35,10 +31,10 @@ O **School Buzzer** é um sistema eletrônico inteligente desenvolvido para auto
 - [x] Protoboard / Fenolite / Jumpers
 
 ### 💻 Software
-- 🔧 **Firmware em C++ (Arduino IDE)**
+- 🔧 **Firmware em C++**
 - 🌐 **Painel Web:** HTML, CSS, JavaScript
-- 🔙 **Back-End:** Node.js ou Python (Flask)
-- 🗃️ **Banco de Dados:** Firebase / MySQL
+- 🔙 **Back-End:** Python (Django)
+- 🗃️ **Banco de Dados:** SQLite3
 - 📶 **Comunicação:** HTTP/WebSocket
 
 ---
