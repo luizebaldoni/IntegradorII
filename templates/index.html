@@ -1,3 +1,26 @@
 {% extends 'base.html' %}
+
+{% block title %}Página Inicial - Sistema{% endblock %}  <!-- Sobrescreve o título da página -->
+
 {% block content %}
-{% endblock content %}
+    <h1>Bem-vindo à Página Inicial!</h1>
+    <p>Esta é a página inicial do nosso sistema, com dados dinâmicos!</p>
+
+    <h2>Dispositivos Registrados:</h2>
+    <ul>
+        {% for device in devices %}
+            <li>{{ device.device_name }} - Última vez visto em: {{ device.last_seen }}</li>
+        {% empty %}
+            <li>Nenhum dispositivo registrado.</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Sensores Disponíveis:</h2>
+    <ul>
+        {% for sensor in sensors %}
+            <li>{{ sensor.name }} - Tipo: {{ sensor.sensor_type }} - Última leitura: {{ sensor.timestamp }}</li>
+        {% empty %}
+            <li>Nenhum sensor registrado.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

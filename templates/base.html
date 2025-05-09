@@ -1,51 +1,39 @@
 <!DOCTYPE html>
 {% load static %}
-<!--HTML Base para os outros templates do app-->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{title}}</title>
+    <title>{% block title %}Página Inicial - Meu Site{% endblock %}</title>
 
-    <link rel="icon" href="{% static 'img/favicon.ico' %}"> <!-- ICONE DO SITE -->
-
-    <!-- STATICS -->
-
+    <link rel="icon" href="{% static 'img/favicon.ico' %}"> <!-- Ícone do site -->
     <link rel="stylesheet" href="{% static 'base.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital@1&display=swap" rel="stylesheet">
-
-    <!-- ACESSIBILIDADE (LIBRAS): -->
-    <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
-    <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
-    <script>new window.VLibras.Widget('https://vlibras.gov.br/app');</script>
-
 </head>
-
 <body>
+
     <header>
-
-
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/about/">Sobre</a></li>
+                <li><a href="/contact/">Contato</a></li>
+            </ul>
+        </nav>
     </header>
-    <div vw class="enabled">
-    <div vw-access-button class="active"></div>
-    <div vw-plugin-wrapper>
-      <div class="vw-plugin-top-wrapper"></div>
-    </div>
-  </div>
-  <footer>
-    <div class="copyright-area">
-        <div class="container">
-            <div class="row">
-                <div class="col-xl-6 col-lg-6 text-center text-lg-left">
-                    <div class="copyright-text">
-                        <p>Copyright &copy; {% now "Y" %}, All Right Reserved <a href=""></a></p>
-                    </div>
-                </div>
-            </div>
+
+    <main>
+        {% block content %}  <!-- Conteúdo da página será inserido aqui -->
+        {% endblock %}
+    </main>
+
+    <footer>
+        <div class="copyright-area">
+            <p>&copy; {% now "Y" %} Todos os direitos reservados.</p>
         </div>
-    </div>
     </footer>
+
 </body>
 </html>

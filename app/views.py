@@ -17,7 +17,9 @@ class HomeView(APIView):
 		sensors = Sensor.objects.all()  # Todos os sensores
 		
 		# Passar dados para o template
-		return render(request, 'index.html', {'devices': devices, 'sensors': sensors, 'title': 'Página Inicial'})
+		return render(request, 'index.html', {'devices': devices,
+		                                                        'sensors': sensors,
+		                                                        'title': 'Página Inicial'})
 	
 	def post(self, request):
 		"""
