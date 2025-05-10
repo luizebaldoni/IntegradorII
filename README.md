@@ -103,7 +103,7 @@ Equipe de Software:
 Equipe de Hardware:
 - Matheus Miranda
 - Vinicios Ramos
-- Gabriela Belardorni
+- Gabriela Bernardoni
 - Maria Eduarda Haidar
 
 Equipe de Integração:
