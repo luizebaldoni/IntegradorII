@@ -67,16 +67,17 @@ O **School Buzzer** é um sistema eletrônico inteligente desenvolvido para auto
 
 - [x] Esboço da idéia da aplicação
 - [x] Definição da linguagem e framework
-- [ ] Criação do projeto
-- [ ] Definir back-end e front-end
+- [x] Criação do projeto
+- [ ] Definir back-end
+- [x] Definir front-end
 - [ ] Criação da database
 - [ ] Receber informações do hardware e salvar na database
-- [ ] Criação da pagina inicial
+- [x] Criação da pagina inicial
 - [ ] Criar sistema de definição de horários e dias (salvar na database)
-- [ ] Criar função de adicionar horários e dias para sirene tocar
-- [ ] Criar função de remover horarios e dias para sirene tocar
-- [ ] Criar função de ativar atraves de botao a sirene instantaneamente
-- [ ] Mostrar na tela quais dias e horários estao definidos
+- [x] Criar função de adicionar horários e dias para sirene tocar
+- [x] Criar função de remover horarios e dias para sirene tocar
+- [x] Criar função de ativar atraves de botao a sirene instantaneamente
+- [x] Mostrar na tela quais dias e horários estao definidos
 - [ ] Definir testes
   
 ## Progresso do Hardware
