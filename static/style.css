@@ -1,0 +1,218 @@
+:root {
+    --bg-color: #000000;
+    --text-color: #ffffff;
+    --accent-color: #e10600;
+    --hover-color: #ff3333;
+    --border-color: #333;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #111;
+    padding: 1rem;
+    border-bottom: 2px solid var(--accent-color);
+    text-align: center;
+}
+
+header h1 {
+    color: var(--accent-color);
+    margin: 0;
+}
+
+nav a {
+    color: var(--text-color);
+    margin: 0 10px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+nav a:hover {
+    color: var(--hover-color);
+}
+
+main {
+    padding: 2rem;
+}
+
+h1, h2, h3 {
+    color: var(--accent-color);
+}
+
+a {
+    color: var(--accent-color);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--hover-color);
+    text-decoration: underline;
+}
+
+.btn {
+    background-color: var(--accent-color);
+    color: var(--text-color);
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 1rem;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn:hover {
+    background-color: var(--hover-color);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+table, th, td {
+    border: 1px solid var(--border-color);
+}
+
+th, td {
+    padding: 0.75rem;
+    text-align: left;
+}
+
+th {
+    background-color: #111;
+    color: var(--accent-color);
+}
+
+tr:nth-child(even) {
+    background-color: #1a1a1a;
+}
+
+tr:hover {
+    background-color: #222;
+}
+
+.form-control, input, select, textarea {
+    background-color: #111;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 0.5rem;
+    border-radius: 4px;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+label {
+    display: block;
+    margin-top: 1rem;
+    font-weight: bold;
+}
+
+/* Checkbox customizado para o tema escuro vermelho/preto/branco */
+input[type="checkbox"] {
+    appearance: none;
+    background-color: #111;
+    border: 2px solid var(--accent-color);
+    width: 18px;
+    height: 18px;
+    border-radius: 3px;
+    margin-right: 8px;
+    vertical-align: middle;
+    cursor: pointer;
+    position: relative;
+}
+
+input[type="checkbox"]:checked {
+    background-color: var(--accent-color);
+}
+
+input[type="checkbox"]::before {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+input[type="checkbox"]:checked::before {
+    display: block;
+    position: absolute;
+    left: 4px;
+    top: 0px;
+    width: 5px;
+    height: 10px;
+    border: solid var(--text-color);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Labels dos checkboxes */
+fieldset legend {
+    color: var(--accent-color);
+    margin-bottom: 0.5rem;
+}
+
+fieldset label {
+    display: inline-block;
+    margin-right: 1.5rem;
+    font-weight: normal;
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+/* Centraliza texto e elementos em bloco */
+.centralizado {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Opcional: limita a largura da tabela e a centraliza */
+.tabela-wrapper {
+    max-width: 800px;  /* ajuste conforme sua necessidade */
+    margin-left: auto;
+    margin-right: auto;
+    overflow-x: auto;  /* se a tabela for maior que a largura disponível, permite scroll horizontal */
+}
+
+/* Por exemplo, para botões pequenos no header */
+nav .btn.btn-sm {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+    margin-left: 0.5rem;
+}
+
+/* ============================================= */
+/* Tornar checkboxes de DAYS_OF_WEEK inline-row  */
+/* ============================================= */
+
+/* Aplica-se ao <ul> gerado para days_of_week */
+#id_days_of_week {
+    list-style: none;     /* Remove marcadores */
+    padding: 0;           /* Remove padding padrão */
+    margin: 0;            /* Remove margem padrão */
+    display: flex;        /* Faz cada <li> virar um item flexível na mesma linha */
+    flex-wrap: wrap;      /* Quebra para a próxima linha se não couber tudo */
+}
+
+/* Cada <li> dentro do ul#id_days_of_week fica inline-block */
+#id_days_of_week li {
+    margin-right: 1rem;   /* Espaçamento entre cada checkbox */
+}
+
+/* Garante que o label envolva o input e o texto de forma alinhada */
+#id_days_of_week li label {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+/* ============================================= */
+/* Fim do ajuste para dias da semana inline-row  */
+/* ============================================= */
