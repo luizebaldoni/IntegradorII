@@ -62,3 +62,41 @@ class GlobalConfig(models.Model):
 
     def __str__(self):
         return "Configuração Global"
+    
+class AlarmSchedule(models.Model):
+    class EventType(models.TextChoices):
+        INICIO_AULA  = 'INICIO', 'Início de Aula'
+        FIM_AULA     = 'FIM',    'Fim de Aula'
+        RECREIO      = 'RECREIO', 'Recreio'
+        TROCA_TURNO  = 'TURNO',  'Troca de Turno'
+
+    time = models.TimeField(verbose_name='Horário')
+    event_type = models.CharField(
+        max_length=10,
+        choices=EventType.choices,
+        verbose_name='Tipo de Evento'
+    )
+
+    DAYS_CHOICES = [
+        ('MON', 'Segunda-feira'),
+        ('TUE', 'Terça-feira'),
+        ('WED', 'Quarta-feira'),
+        ('THU', 'Quinta-feira'),
+        ('FRI', 'Sexta-feira'),
+        ('SAT', 'Sábado'),
+        ('SUN', 'Domingo'),
+    ]
+    days_of_week = models.CharField(
+        max_length=21,
+        verbose_name='Dias da Semana',
+        help_text='Ex: MON,TUE,WED para segunda, terça e quarta'
+    )
+
+    start_date = models.DateField(verbose_name='Data de Início')
+    end_date = models.DateField(verbose_name='Data de Término')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.get_event_type_display()} às {self.time.strftime('%H:%M')} ({self.start_date} → {self.end_date})"
