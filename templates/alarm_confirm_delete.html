@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}Confirmar Exclusão{% endblock %}
+
+{% block content %}
+  <h1>Excluir Agendamento</h1>
+  <p>Tem certeza de que deseja excluir o agendamento:</p>
+  <p><strong>{{ object.get_event_type_display }} às {{ object.time|time:"H:i" }} ({{ object.start_date }} → {{ object.end_date }})</strong></p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Sim, excluir</button>
+    <a href="{% url 'app:alarm-list' %}" class="btn btn-secondary">Cancelar</a>
+  </form>
+{% endblock %}

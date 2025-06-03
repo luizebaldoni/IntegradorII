@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Agendamentos{% endblock %}
+
+{% block content %}
+<h2>Agendamentos</h2>
+<a href="{% url 'app:alarm-create' %}" class="btn">Novo Alarme</a>
+
+{% if alarms %}
+<table>
+    <thead>
+        <tr>
+            <th>Tipo</th>
+            <th>Horário</th>
+            <th>Dias</th>
+            <th>Período</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for alarm in alarms %}
+        <tr>
+            <td>{{ alarm.get_event_type_display }}</td>
+            <td>{{ alarm.time }}</td>
+            <td>{{ alarm.days_of_week }}</td>
+            <td>{{ alarm.start_date }} - {{ alarm.end_date }}</td>
+            <td>
+                <a href="{% url 'app:alarm-update' alarm.pk %}" class="btn">Editar</a>
+                <a href="{% url 'app:alarm-delete' alarm.pk %}" class="btn">Excluir</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Nenhum agendamento cadastrado.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% if form.instance.pk %}Editar Alarme{% else %}Novo Alarme{% endif %}{% endblock %}
+
+{% block content %}
+  <h2>{% if form.instance.pk %}Editar Alarme{% else %}Novo Alarme{% endif %}</h2>
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+
+    <label for="{{ form.event_type.id_for_label }}">
+      {{ form.event_type.label }}
+    </label>
+    {{ form.event_type }}
+
+    {% if form.event_type.errors %}
+      <div class="text-danger">{{ form.event_type.errors }}</div>
+    {% endif %}
+
+    <label for="{{ form.time.id_for_label }}">
+      {{ form.time.label }}
+    </label>
+    {{ form.time }}
+
+    {% if form.time.errors %}
+      <div class="text-danger">{{ form.time.errors }}</div>
+    {% endif %}
+
+    <fieldset>
+      <legend>{{ form.days_of_week.label }}</legend>
+      {{ form.days_of_week }}
+      {% if form.days_of_week.errors %}
+        <div class="text-danger">{{ form.days_of_week.errors }}</div>
+      {% endif %}
+    </fieldset>
+
+    <label for="{{ form.start_date.id_for_label }}">
+      {{ form.start_date.label }}
+    </label>
+    {{ form.start_date }}
+
+    {% if form.start_date.errors %}
+      <div class="text-danger">{{ form.start_date.errors }}</div>
+    {% endif %}
+
+    <label for="{{ form.end_date.id_for_label }}">
+      {{ form.end_date.label }}
+    </label>
+    {{ form.end_date }}
+
+    {% if form.end_date.errors %}
+      <div class="text-danger">{{ form.end_date.errors }}</div>
+    {% endif %}
+
+    <button type="submit" class="btn">
+      {% if form.instance.pk %}Salvar Alterações{% else %}Criar Alarme{% endif %}
+    </button>
+    <a href="{% url 'app:alarm-list' %}" class="btn">Cancelar</a>
+  </form>
+{% endblock %}
