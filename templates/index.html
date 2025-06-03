@@ -1,26 +1,51 @@
 {% extends 'base.html' %}
-
-{% block title %}Página Inicial - Sistema{% endblock %}  <!-- Sobrescreve o título da página -->
+{% block title %}SchoolBuzzer{% endblock %}
 
 {% block content %}
-    <h1>Bem-vindo à Página Inicial!</h1>
-    <p>Esta é a página inicial do nosso sistema, com dados dinâmicos!</p>
+  <h2 class="centralizado mt-4">Bem-vindo(a) ao Sistema da Campainha</h2>
 
-    <h2>Dispositivos Registrados:</h2>
-    <ul>
-        {% for device in devices %}
-            <li>{{ device.device_name }} - Última vez visto em: {{ device.last_seen }}</li>
-        {% empty %}
-            <li>Nenhum dispositivo registrado.</li>
-        {% endfor %}
-    </ul>
+  <section class="mt-4">
+    <h3 class="centralizado mb-4">Agendamentos já cadastrados</h3>
 
-    <h2>Sensores Disponíveis:</h2>
-    <ul>
-        {% for sensor in sensors %}
-            <li>{{ sensor.name }} - Tipo: {{ sensor.sensor_type }} - Última leitura: {{ sensor.timestamp }}</li>
-        {% empty %}
-            <li>Nenhum sensor registrado.</li>
-        {% endfor %}
-    </ul>
+    {% if alarms %}
+      <div class="tabela-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>Horário</th>
+              <th>Dias</th>
+              <th>Período</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for alarm in alarms %}
+              <tr>
+                <td>{{ alarm.get_event_type_display }}</td>
+                <td>{{ alarm.time|time:"H:i" }}</td>
+                <td>{{ alarm.days_of_week }}</td>
+                <td>{{ alarm.start_date }} → {{ alarm.end_date }}</td>
+                <td>
+                  <a href="{% url 'app:alarm-update' alarm.pk %}" class="btn btn-sm">Editar</a>
+                  <a href="{% url 'app:alarm-delete' alarm.pk %}" class="btn btn-sm">Excluir</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="centralizado">Nenhum agendamento cadastrado.</p>
+    {% endif %}
+
+    <div class="centralizado mt-3">
+      <a href="{% url 'app:alarm-create' %}" class="btn">Criar novo Agendamento</a>
+    </div>
+
+    <div class="centralizado mt-4">
+      <a href="{% url 'app:ring-now' %}" class="btn">Tocar Campainha</a>
+    </div>
+
+  </section>
 {% endblock %}
