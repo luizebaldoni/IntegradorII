@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
-{% block title %}SchoolBuzzer{% endblock %}
+{% block title %}
+  SchoolBuzzer
+{% endblock %}
 
 {% block content %}
   <h2 class="centralizado mt-4">Bem-vindo(a) ao Sistema da Campainha</h2>
@@ -23,7 +25,7 @@
             {% for alarm in alarms %}
               <tr>
                 <td>{{ alarm.get_event_type_display }}</td>
-                <td>{{ alarm.time|time:"H:i" }}</td>
+                <td>{{ alarm.time|time:'H:i' }}</td>
                 <td>{{ alarm.days_of_week }}</td>
                 <td>{{ alarm.start_date }} → {{ alarm.end_date }}</td>
                 <td>
@@ -42,10 +44,8 @@
     <div class="centralizado mt-3">
       <a href="{% url 'app:alarm-create' %}" class="btn">Criar novo Agendamento</a>
     </div>
-
-    <div class="centralizado mt-4">
-      <a href="{% url 'app:ring-now' %}" class="btn">Tocar Campainha</a>
-    </div>
-
   </section>
-{% endblock %}
+
+  <a href="{% url 'app:ring-now' %}" class="btn btn-danger ring-btn" title="Tocar Campainha"><i class="fas fa-bell fa-lg"></i></a>
+
+  {% endblock %}
