@@ -100,10 +100,10 @@ Equipe de Software:
 - Eduardo Schlesner
 - Leonardo Moscheta
 - Higor Brum
+- Vinicios Ramos
 
 Equipe de Hardware:
 - Matheus Miranda
-- Vinicios Ramos
 - Gabriela Bernardoni
 - Maria Eduarda Haidar
 
