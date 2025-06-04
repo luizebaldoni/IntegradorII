@@ -78,18 +78,18 @@ class AlarmSchedule(models.Model):
     )
 
     DAYS_CHOICES = [
-        ('MON', 'Segunda-feira'),
-        ('TUE', 'Terça-feira'),
-        ('WED', 'Quarta-feira'),
-        ('THU', 'Quinta-feira'),
-        ('FRI', 'Sexta-feira'),
-        ('SAT', 'Sábado'),
-        ('SUN', 'Domingo'),
+        ('SEG', 'Segunda-feira'),
+        ('TER', 'Terça-feira'),
+        ('QUA', 'Quarta-feira'),
+        ('QUI', 'Quinta-feira'),
+        ('SEX', 'Sexta-feira'),
+        ('SAB', 'Sábado'),
+        ('DOM', 'Domingo'),
     ]
     days_of_week = models.CharField(
         max_length=21,
         verbose_name='Dias da Semana',
-        help_text='Ex: MON,TUE,WED para segunda, terça e quarta'
+        help_text='Ex: SEG,TER,QUA para segunda, terça e quarta'
     )
 
     start_date = models.DateField(verbose_name='Data de Início')
