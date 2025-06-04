@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import render, redirect  # adicionamos redirect
 from rest_framework.views import APIView
 from django.urls import reverse_lazy, reverse  # já tinha reverse_lazy; adicionamos reverse
@@ -10,7 +11,7 @@ import requests                            # para fazer o POST ao ESP
 from requests.exceptions import RequestException
 
 from .forms import AlarmForm
-from .models import Sensor, Device, SensorData, AlarmSchedule
+from .models import Sensor, Device, SensorData, AlarmSchedule, DeviceLog, DeviceConfig
 
 class HomeView(APIView):
 	def get(self, request):
@@ -31,28 +32,72 @@ class HomeView(APIView):
             'title': 'Página Inicial'
         })
                                                  
-	def post(self, request):
-		"""
-		Recebe dados da ESP (por exemplo, sensores) e processa.
-		"""
-		# Dados da requisição
-		sensor_data = request.data  # Os dados da ESP serão passados no corpo da requisição
-		
-		# Obtendo ou criando o dispositivo
-		device, created = Device.objects.get_or_create(device_id = sensor_data.get('device_id'))
-		
-		# Obtendo o sensor (ou criando um novo, se não existir)
-		sensor, created = Sensor.objects.get_or_create(name = sensor_data.get('sensor_name'))
-		
-		# Salvando a leitura do sensor
-		sensor_data_entry = SensorData.objects.create(
-				sensor = sensor,
-				device = device,
-				value = sensor_data.get('sensor_value')
-				)
-		
-		return JsonResponse(
-				{'message': 'Dados recebidos e processados com sucesso', 'data': sensor_data_entry.to_dict()})
+def post(self, request):
+        """
+        Espera receber JSON no formato:
+        {
+          "device_id": "ESP32-1234",
+          "device_name": "Campainha-ESP32",
+          "sensor_name": "SensTemp",
+          "sensor_type": "DHT11",
+          "sensor_value": 23.5
+        }
+        """
+        try:
+            # Tenta decodificar JSON
+            payload = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'JSON inválido'}, status=400)
+
+        # 1. Obter ou criar device
+        device_id = payload.get('device_id')
+        device_name = payload.get('device_name', device_id)
+        if not device_id:
+            return JsonResponse({'error': 'device_id é obrigatório'}, status=400)
+
+        device, created = Device.objects.get_or_create(
+            device_id=device_id,
+            defaults={'device_name': device_name}
+        )
+        if not created:
+            # se já existia, atualize o nome (caso tenha mudado)
+            if device.device_name != device_name:
+                device.device_name = device_name
+                device.save()
+
+        # Opcional: registrar no DeviceLog
+        DeviceLog.objects.create(
+            device=device,
+            log_message=f"Dados recebidos do hardware: {payload}"
+        )
+
+        # 2. Sensor
+        sensor_name = payload.get('sensor_name')
+        sensor_type = payload.get('sensor_type')
+        sensor_value = payload.get('sensor_value')
+        if not sensor_name or sensor_value is None:
+            return JsonResponse({'error': 'sensor_name e sensor_value são obrigatórios'}, status=400)
+
+        # Obter ou criar sensor (por nome + tipo)
+        sensor, _ = Sensor.objects.get_or_create(
+            name=sensor_name,
+            sensor_type=sensor_type or '',
+            defaults={'value': sensor_value}
+        )
+        # Criar registro de leitura (SensorData)
+        sensor_data_entry = SensorData.objects.create(
+            sensor = sensor,
+            device = device,
+            value  = sensor_value
+        )
+
+        # 3. Opcional: associar um DeviceConfig padrão ao device, se não existir
+        DeviceConfig.objects.get_or_create(device=device)
+
+        return JsonResponse({
+            'message': 'Dados recebidos e processados com sucesso',
+            'data': sensor_data_entry.to_dict()
+        }, status=201)
 
 class AlarmListView(ListView):
     model = AlarmSchedule

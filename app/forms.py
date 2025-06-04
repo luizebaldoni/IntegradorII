@@ -29,7 +29,7 @@ class AlarmForm(forms.ModelForm):
     def clean_days_of_week(self):
         """
         Recebe a lista de valores (ex: ['SEG', 'QUA', 'SEX'])
-        e converte para string “MON,WED,FRI” para armazenar no model.
+        e converte para string SEG,QUA,SEX” para armazenar no model.
         """
         dias = self.cleaned_data.get('days_of_week', [])
         # Garante que seja uma lista de strings válidas
