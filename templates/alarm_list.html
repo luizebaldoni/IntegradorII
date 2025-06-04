@@ -3,8 +3,7 @@
 {% block title %}Agendamentos{% endblock %}
 
 {% block content %}
-<h2>Agendamentos</h2>
-<a href="{% url 'app:alarm-create' %}" class="btn">Novo Alarme</a>
+<h2 class="centralizado mt-4">Agendamentos</h2>
 
 {% if alarms %}
 <table>
@@ -33,6 +32,11 @@
     </tbody>
 </table>
 {% else %}
-<p>Nenhum agendamento cadastrado.</p>
+<p class="centralizado mt-4">Nenhum agendamento cadastrado.</p>
 {% endif %}
+
+<div class="centralizado mt-4">
+<a href="{% url 'app:alarm-create' %}" class="btn">Novo Alarme</a>
+<div>
+    
 {% endblock %}
