@@ -85,7 +85,13 @@ class GlobalConfig(models.Model):
 
     def __str__(self):
         return "Configuração Global"
+    
+class ComandoESP(models.Model):
+    comando = models.CharField(max_length=10, default='desligar')  # 'ligar' ou 'desligar'
 
+    def __str__(self):
+        return f"Comando atual: {self.comando}"
+    
 #### AGENDA DE EVENTOS (ESCOLA / AUTOMAÇÃO) ####
 class AlarmSchedule(models.Model):
 

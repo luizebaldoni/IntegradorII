@@ -13,7 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
 from .forms import AlarmForm
-from .models import Device, Sensor, AlarmSchedule, DeviceLog, DeviceConfig
+from .models import *
 
 # === Endpoint para ESP consultar comando ===
 @csrf_exempt
@@ -50,14 +50,20 @@ class HomeView(APIView):
                 messages.error(request, f"Erro ao acionar campainha: {e}")
 
         return redirect('app:home')
-    
+
 # === ENDPOINT PARA O ESP ===
 def comando_esp(request):
     """
-    Retorna o comando 'ligar' ou 'desligar' como resposta de texto puro.
-    Este endpoint é acessado via HTTP GET pelo ESP8266.
+    Retorna o comando atual e reseta para 'desligar' após leitura.
     """
-    return HttpResponse("ligar")  # Você pode trocar por "desligar" se quiser testar
+    comando, _ = ComandoESP.objects.get_or_create(id=1)
+    resposta = comando.comando
+
+    # Após ler, zera para "desligar"
+    comando.comando = 'desligar'
+    comando.save()
+
+    return HttpResponse(resposta)
 
 class AlarmListView(ListView):
     model = AlarmSchedule
@@ -78,6 +84,11 @@ class AlarmUpdateView(UpdateView):
     template_name = 'alarm_form.html'
     success_url = reverse_lazy('app:alarm-list')
 
+def ativar_campainha(request):
+    comando, _ = ComandoESP.objects.get_or_create(id=1)
+    comando.comando = 'ligar'
+    comando.save()
+    return redirect('app:home')
 
 class AlarmDeleteView(DeleteView):
     model = AlarmSchedule

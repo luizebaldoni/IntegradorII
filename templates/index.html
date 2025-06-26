@@ -53,13 +53,9 @@
             </div>
         </div>
     </div>
-
-    <form method="post" action="/" style="position: fixed; bottom: 20px; right: 20px;">
-        {% csrf_token %}
-        <input type="hidden" name="acao" value="ligar">
-        <button type="submit" class="btn btn-danger ring-btn" title="Tocar Campainha">
-            <i class="fas fa-bell fa-lg"></i>
-        </button>
-    </form>
+<form action="{% url 'app:ativar-campainha' %}" method="post">
+  {% csrf_token %}
+  <button class="btn btn-primary">Tocar campainha</button>
+</form>
 </div>
 {% endblock %}

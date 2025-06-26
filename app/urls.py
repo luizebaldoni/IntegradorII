@@ -24,4 +24,5 @@ urlpatterns = [
     path('agendamentos/editar/<int:pk>/', AlarmUpdateView.as_view(), name='alarm-update'),
     path('agendamentos/remover/<int:pk>/', AlarmDeleteView.as_view(), name='alarm-delete'),
 	path('api/comando', comando_esp, name = 'comando-esp'),  # <- esta é a rota para o ESP
+	path('ativar/', ativar_campainha, name='ativar-campainha'),
 ]
