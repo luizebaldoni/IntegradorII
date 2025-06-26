@@ -1,17 +1,23 @@
 {% extends 'base.html' %}
 {% load i18n %}
-
-{% block title %}Confirmar Exclusão{% endblock %}
+{% block title %}Confirmar Exclusão - Sistema de Sirene Escolar{% endblock %}
 
 {% block content %}
-  <h1 class="centralizado mt-4">Excluir Agendamento</h1>
-  <p class="centralizado mt-4">Tem certeza de que deseja excluir o agendamento:</p>
-  <p class="centralizado mt-4"><strong>{{ object.get_event_type_display }} às {{ object.time|time:"H:i" }} ({{ object.start_date }} → {{ object.end_date }})</strong></p>
-  <form method="post">
-    {% csrf_token %}
-    <div class="centralizado mt-4">
-      <button type="submit" class="btn btn-danger">Sim, excluir</button>
-      <a href="{% url 'app:alarm-list' %}" class="btn btn-secondary">Cancelar</a>
+<div class="container">
+    <div class="header">
+        <h1>🔔 Sistema de Sirene Escolar</h1>
+        <p>Confirmação de Exclusão de Agendamento</p>
     </div>
-  </form>
+
+    <div class="content centralizado">
+        <p>Tem certeza de que deseja excluir o agendamento?</p>
+        <p><strong>{{ object.get_event_type_display }} às {{ object.time|time:"H:i" }} ({{ object.start_date }} → {{ object.end_date }})</strong></p>
+
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Sim, excluir</button>
+            <a href="{% url 'app:alarm-list' %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
 {% endblock %}

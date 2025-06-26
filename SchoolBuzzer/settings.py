@@ -121,6 +121,15 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '192.168.1.12',  # ← Seu IP local (acessado pelo ESP)
+]
+
+ESP_BELL_URL = "http://192.168.1.14/ring"  # Substitua pelo IP real da sua ESP
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 

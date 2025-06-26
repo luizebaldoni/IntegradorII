@@ -14,6 +14,6 @@ ROTAS DEFINIDAS:
 """
 
 urlpatterns = [
-    path('admin/', admin.site.urls),        # Rota para o painel administrativo padrão do Django
-    path('', include('app.urls')),          # Inclusão das rotas definidas em app/urls.py
+		path('admin/', admin.site.urls),
+		path('', include(('app.urls', 'app'), namespace = 'app')),  # ← CORRETO
 ]

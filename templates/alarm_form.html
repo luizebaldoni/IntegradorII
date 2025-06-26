@@ -4,58 +4,73 @@
 {% block title %}{% if form.instance.pk %}Editar Alarme{% else %}Novo Alarme{% endif %}{% endblock %}
 
 {% block content %}
-  <h2>{% if form.instance.pk %}Editar Alarme{% else %}Novo Alarme{% endif %}</h2>
+<div class="container">
+  <div class="header">
+    <h1>🔔 Sistema de Sirene Escolar</h1>
+    <p>{% if form.instance.pk %}Editar Agendamento{% else %}Novo Agendamento{% endif %}</p>
+  </div>
 
-  <form method="post" novalidate>
-    {% csrf_token %}
+  <div class="content">
+    <div class="form-section">
+      <form method="post" novalidate>
+        {% csrf_token %}
 
-    <label for="{{ form.event_type.id_for_label }}">
-      {{ form.event_type.label }}
-    </label>
-    {{ form.event_type }}
+        <div class="form-group">
+          <label for="{{ form.event_type.id_for_label }}">
+            {{ form.event_type.label }}
+          </label>
+          {{ form.event_type }}
+          {% if form.event_type.errors %}
+            <div class="text-danger">{{ form.event_type.errors }}</div>
+          {% endif %}
+        </div>
 
-    {% if form.event_type.errors %}
-      <div class="text-danger">{{ form.event_type.errors }}</div>
-    {% endif %}
+        <div class="form-group">
+          <label for="{{ form.time.id_for_label }}">
+            {{ form.time.label }}
+          </label>
+          {{ form.time }}
+          {% if form.time.errors %}
+            <div class="text-danger">{{ form.time.errors }}</div>
+          {% endif %}
+        </div>
 
-    <label for="{{ form.time.id_for_label }}">
-      {{ form.time.label }}
-    </label>
-    {{ form.time }}
+        <div class="form-group">
+          <label>{{ form.days_of_week.label }}</label>
+          {{ form.days_of_week }}
+          {% if form.days_of_week.errors %}
+            <div class="text-danger">{{ form.days_of_week.errors }}</div>
+          {% endif %}
+        </div>
 
-    {% if form.time.errors %}
-      <div class="text-danger">{{ form.time.errors }}</div>
-    {% endif %}
+        <div class="form-group">
+          <label for="{{ form.start_date.id_for_label }}">
+            {{ form.start_date.label }}
+          </label>
+          {{ form.start_date }}
+          {% if form.start_date.errors %}
+            <div class="text-danger">{{ form.start_date.errors }}</div>
+          {% endif %}
+        </div>
 
-    <fieldset>
-      <legend>{{ form.days_of_week.label }}</legend>
-      {{ form.days_of_week }}
-      {% if form.days_of_week.errors %}
-        <div class="text-danger">{{ form.days_of_week.errors }}</div>
-      {% endif %}
-    </fieldset>
+        <div class="form-group">
+          <label for="{{ form.end_date.id_for_label }}">
+            {{ form.end_date.label }}
+          </label>
+          {{ form.end_date }}
+          {% if form.end_date.errors %}
+            <div class="text-danger">{{ form.end_date.errors }}</div>
+          {% endif %}
+        </div>
 
-    <label for="{{ form.start_date.id_for_label }}">
-      {{ form.start_date.label }}
-    </label>
-    {{ form.start_date }}
-
-    {% if form.start_date.errors %}
-      <div class="text-danger">{{ form.start_date.errors }}</div>
-    {% endif %}
-
-    <label for="{{ form.end_date.id_for_label }}">
-      {{ form.end_date.label }}
-    </label>
-    {{ form.end_date }}
-
-    {% if form.end_date.errors %}
-      <div class="text-danger">{{ form.end_date.errors }}</div>
-    {% endif %}
-
-    <button type="submit" class="btn">
-      {% if form.instance.pk %}Salvar Alterações{% else %}Criar Alarme{% endif %}
-    </button>
-    <a href="{% url 'app:alarm-list' %}" class="btn">Cancelar</a>
-  </form>
+        <div class="form-group">
+          <button type="submit" class="btn">
+            {% if form.instance.pk %}Salvar Alterações{% else %}Criar Alarme{% endif %}
+          </button>
+          <a href="{% url 'app:alarm-list' %}" class="btn">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 {% endblock %}
