@@ -1,5 +1,5 @@
 from django import forms
-from .models import AlarmSchedule
+from .models import *
 
 """
 FORMULÁRIO DE AGENDAMENTO DE EVENTOS – SISTEMA DE MONITORAMENTO IoT

@@ -96,6 +96,17 @@ class AlarmSchedule(models.Model):
         RECREIO      = 'RECREIO',  'Recreio'
         TROCA_TURNO  = 'TURNO',    'Troca de Turno'
 
+    # Opções de dias da semana para o campo personalizado no formulário
+    DAYS_CHOICES = [
+        ('SEG', 'Segunda-feira'),
+        ('TER', 'Terça-feira'),
+        ('QUA', 'Quarta-feira'),
+        ('QUI', 'Quinta-feira'),
+        ('SEX', 'Sexta-feira'),
+        ('SAB', 'Sábado'),
+        ('DOM', 'Domingo'),
+    ]
+
     time = models.TimeField(verbose_name='Horário')                 # Horário de execução do evento
     event_type = models.CharField(                                  # Tipo de evento programado
         max_length=10,
@@ -103,7 +114,7 @@ class AlarmSchedule(models.Model):
         verbose_name='Tipo de Evento'
     )
 
-    # Dias da semana para repetição
+    # Dias da semana para repetição (armazenados como string separada por vírgulas)
     days_of_week = models.CharField(
         max_length=21,
         verbose_name='Dias da Semana',
