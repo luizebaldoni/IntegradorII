@@ -1,38 +1,56 @@
-# app/forms.py
 from django import forms
 from .models import AlarmSchedule
 
+"""
+FORMULÁRIO DE AGENDAMENTO DE EVENTOS – SISTEMA DE MONITORAMENTO IoT
+
+DESCRIÇÃO:
+Este módulo define o formulário utilizado para criar ou editar eventos agendados no sistema IoT.
+Permite a seleção de dias da semana via checkboxes e o preenchimento de dados como tipo de evento,
+horário e período de vigência. O campo `days_of_week` é tratado como múltipla escolha e convertido
+em string separada por vírgulas para armazenamento no banco de dados.
+
+FORMULÁRIOS:
+- AlarmForm: formulário vinculado ao modelo AlarmSchedule, com customização no campo de dias da semana.
+"""
+
+#### FORMULÁRIO DE AGENDAMENTO DE EVENTOS ####
 class AlarmForm(forms.ModelForm):
-    # Sobrescreve days_of_week como múltipla escolha (checkboxes)
+    # Campo personalizado para múltipla escolha de dias (exibido como checkboxes)
     days_of_week = forms.MultipleChoiceField(
-        choices=AlarmSchedule.DAYS_CHOICES,
-        widget=forms.CheckboxSelectMultiple,
-        label='Dias da Semana',
-        help_text='Selecione um ou mais dias'
+        choices=AlarmSchedule.DAYS_CHOICES,                      # Lista de opções válidas (SEG, TER, etc.)
+        widget=forms.CheckboxSelectMultiple,                     # Widget HTML: checkbox múltiplo
+        label='Dias da Semana',                                  # Rótulo exibido no formulário
+        help_text='Selecione um ou mais dias'                    # Texto auxiliar ao usuário
     )
 
     class Meta:
-        model = AlarmSchedule
-        fields = [
+        model = AlarmSchedule                                    # Modelo associado ao formulário
+        fields = [                                               # Campos exibidos no formulário
             'event_type',
             'time',
             'days_of_week',
             'start_date',
             'end_date',
         ]
-        widgets = {
-            'time': forms.TimeInput(attrs={'type': 'time'}),
-            'start_date': forms.DateInput(attrs={'type': 'date'}),
-            'end_date': forms.DateInput(attrs={'type': 'date'}),
+        widgets = {                                              # Personalização dos campos (HTML5)
+            'time': forms.TimeInput(attrs={'type': 'time'}),        # Campo de horário
+            'start_date': forms.DateInput(attrs={'type': 'date'}),  # Campo de data inicial
+            'end_date': forms.DateInput(attrs={'type': 'date'}),    # Campo de data final
         }
 
     def clean_days_of_week(self):
         """
-        Recebe a lista de valores (ex: ['SEG', 'QUA', 'SEX'])
-        e converte para string SEG,QUA,SEX” para armazenar no model.
+        Valida e converte a lista de dias da semana selecionados
+        em uma string separada por vírgulas (ex: 'SEG,QUA,SEX').
+
+        Returns:
+            str: Dias formatados como string
+
+        Raises:
+            forms.ValidationError: Se nenhum dia for selecionado
         """
         dias = self.cleaned_data.get('days_of_week', [])
-        # Garante que seja uma lista de strings válidas
         if not dias:
             raise forms.ValidationError("Selecione ao menos um dia da semana.")
         return ",".join(dias)
