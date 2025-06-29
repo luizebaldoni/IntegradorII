@@ -44,7 +44,7 @@ class ComandoESPAdmin(admin.ModelAdmin):
     date_hierarchy = 'timestamp'
     ordering = ('-timestamp',)
     search_fields = ('comando',)
-
+    
 # Registro dos modelos
 admin.site.register(AlarmSchedule, AlarmScheduleAdmin)
 admin.site.register(SirenStatus, SirenStatusAdmin)

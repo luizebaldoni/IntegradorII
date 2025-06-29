@@ -49,7 +49,7 @@ def comando_esp(request):
 	
 	try:
 		# Obtém o dia da semana atual no formato PT-BR
-		now = timezone.now()
+		now = timezone.localtime(timezone.now())  # Converte para o fuso horário configurado
 		weekday_en = now.strftime('%a')
 		weekday_pt = DAYS_MAP.get(weekday_en, weekday_en)
 		
