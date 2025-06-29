@@ -1,5 +1,8 @@
 import json
+from time import timezone
+from celery import shared_task
 import requests
+from django.utils.timezone import localtime
 from requests.exceptions import RequestException
 
 from django.shortcuts import render, redirect
@@ -21,49 +24,64 @@ def esp_check(request):
     return HttpResponse("ligar", content_type="text/plain")
 
 
-@method_decorator(csrf_exempt, name='dispatch')
+@method_decorator(csrf_exempt, name = 'dispatch')
 class HomeView(APIView):
     def get(self, request):
-        devices = Device.objects.all()
-        sensors = Sensor.objects.all()
-        alarms = AlarmSchedule.objects.all()
-
+        dispositivos = Device.objects.all()
+        agendamentos = AlarmSchedule.objects.all()
+        
         return render(request, 'index.html', {
-            'devices': devices,
-            'sensors': sensors,
-            'alarms': alarms,
-            'title': 'Página Inicial'
-        })
-
+                'dispositivos': dispositivos,
+                'agendamentos': agendamentos,
+                'titulo': 'Página Inicial'
+                })
+    
     def post(self, request):
-        if request.POST.get('acao') == 'ligar':
-            esp_url = getattr(settings, 'ESP_BELL_URL', None)
-            if not esp_url:
-                messages.error(request, "ESP_BELL_URL não configurado.")
-                return redirect('app:home')
-
+        acao = request.POST.get('acao')
+        
+        # Cria uma instância da classe ComandoESP para enviar comandos
+        comando_esp = ComandoESP()
+        
+        if acao == 'ligar':
             try:
-                response = requests.post(esp_url, timeout=5)
-                response.raise_for_status()
+                comando_esp.enviar_comando('ligar')
                 messages.success(request, "Campainha acionada com sucesso.")
-            except RequestException as e:
+            except Exception as e:
                 messages.error(request, f"Erro ao acionar campainha: {e}")
-
+        
+        elif acao == 'desligar':
+            try:
+                comando_esp.enviar_comando('desligar')
+                messages.success(request, "Campainha desligada com sucesso.")
+            except Exception as e:
+                messages.error(request, f"Erro ao desligar campainha: {e}")
+        
         return redirect('app:home')
 
 # === ENDPOINT PARA O ESP ===
+@csrf_exempt
 def comando_esp(request):
     """
-    Retorna o comando atual e reseta para 'desligar' após leitura.
+    Retorna os agendamentos atuais em formato JSON.
     """
-    comando, _ = ComandoESP.objects.get_or_create(id=1)
-    resposta = comando.comando
-
-    # Após ler, zera para "desligar"
-    comando.comando = 'desligar'
-    comando.save()
-
-    return HttpResponse(resposta)
+    agendamentos = AlarmSchedule.objects.filter(
+            start_date__lte = localtime().date(),
+            end_date__gte = localtime().date(),
+            days_of_week__contains = localtime().strftime('%a').upper()[:3]
+            )
+    
+    # Serializa os agendamentos
+    agendamentos_data = []
+    for agendamento in agendamentos:
+        agendamentos_data.append({
+                'event_type': agendamento.get_event_type_display(),
+                'time': agendamento.time.strftime('%H:%M'),
+                'days_of_week': agendamento.days_of_week,
+                'start_date': agendamento.start_date.isoformat(),
+                'end_date': agendamento.end_date.isoformat(),
+                })
+    
+    return JsonResponse({'agendamentos': agendamentos_data})
 
 class AlarmListView(ListView):
     model = AlarmSchedule
@@ -94,3 +112,18 @@ class AlarmDeleteView(DeleteView):
     model = AlarmSchedule
     template_name = 'alarm_confirm_delete.html'
     success_url = reverse_lazy('app:alarm-list')
+
+def verificar_agendamentos():
+    # Obter os agendamentos do banco de dados
+    agendamentos = AlarmSchedule.objects.filter(
+        start_date__lte=timezone.now().date(),
+        end_date__gte=timezone.now().date(),
+        days_of_week__contains=timezone.now().strftime('%a').upper()[:3]
+    )
+    for agendamento in agendamentos:
+        if agendamento.time == timezone.now().time():
+            ativar_campainha(None)  # Chama a função que ativa a sirene
+
+@shared_task
+def verificar_agendamentos_periodicamente():
+    verificar_agendamentos()
