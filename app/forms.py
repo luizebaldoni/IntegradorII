@@ -1,56 +1,73 @@
-from django import forms
-from .models import *
-
 """
-FORMULÁRIO DE AGENDAMENTO DE EVENTOS – SISTEMA DE MONITORAMENTO IoT
+FORMULÁRIOS DO SISTEMA DE SIRENE ESCOLAR
 
 DESCRIÇÃO:
-Este módulo define o formulário utilizado para criar ou editar eventos agendados no sistema IoT.
-Permite a seleção de dias da semana via checkboxes e o preenchimento de dados como tipo de evento,
-horário e período de vigência. O campo `days_of_week` é tratado como múltipla escolha e convertido
-em string separada por vírgulas para armazenamento no banco de dados.
+Este módulo contém todos os formulários do sistema, incluindo:
+- Formulário para criação/edição de agendamentos
+- Validações customizadas para dados de agendamento
 
 FORMULÁRIOS:
-- AlarmForm: formulário vinculado ao modelo AlarmSchedule, com customização no campo de dias da semana.
+- AlarmForm: Formulário para manipulação de AlarmSchedule
 """
 
-#### FORMULÁRIO DE AGENDAMENTO DE EVENTOS ####
+from django import forms
+from django.core.exceptions import ValidationError
+from .models import AlarmSchedule
+
+
 class AlarmForm(forms.ModelForm):
-    # Campo personalizado para múltipla escolha de dias (exibido como checkboxes)
-    days_of_week = forms.MultipleChoiceField(
-        choices=AlarmSchedule.DAYS_CHOICES,                      # Lista de opções válidas (SEG, TER, etc.)
-        widget=forms.CheckboxSelectMultiple,                     # Widget HTML: checkbox múltiplo
-        label='Dias da Semana',                                  # Rótulo exibido no formulário
-        help_text='Selecione um ou mais dias'                    # Texto auxiliar ao usuário
-    )
+	"""
+    Formulário para criação/edição de agendamentos
 
-    class Meta:
-        model = AlarmSchedule                                    # Modelo associado ao formulário
-        fields = [                                               # Campos exibidos no formulário
-            'event_type',
-            'time',
-            'days_of_week',
-            'start_date',
-            'end_date',
-        ]
-        widgets = {                                              # Personalização dos campos (HTML5)
-            'time': forms.TimeInput(attrs={'type': 'time'}),        # Campo de horário
-            'start_date': forms.DateInput(attrs={'type': 'date'}),  # Campo de data inicial
-            'end_date': forms.DateInput(attrs={'type': 'date'}),    # Campo de data final
-        }
+    Campos personalizados:
+    - days_of_week: Exibido como checkboxes múltiplos
+    - time: Campo de horário com input type='time'
+    - start_date/end_date: Campos de data com input type='date'
+    """
+	days_of_week = forms.MultipleChoiceField(
+			choices = AlarmSchedule.DAYS_CHOICES,
+			widget = forms.CheckboxSelectMultiple,
+			label = 'Dias da Semana',
+			help_text = 'Selecione os dias de repetição'
+			)
+	
+	class Meta:
+		model = AlarmSchedule
+		fields = ['event_type', 'time', 'days_of_week', 'start_date', 'end_date', 'active']
+		widgets = {
+				'time': forms.TimeInput(attrs = {'type': 'time'}),
+				'start_date': forms.DateInput(attrs = {'type': 'date'}),
+				'end_date': forms.DateInput(attrs = {'type': 'date'}),
+				}
+		labels = {
+				'active': 'Ativo'
+				}
+	
+	def clean_days_of_week(self):
+		"""
+        Valida e formata os dias da semana selecionados
 
-    def clean_days_of_week(self):
+        Retorna:
+        - String com dias separados por vírgula (ex: "SEG,QUA,SEX")
+
+        Erros:
+        - ValidationError se nenhum dia for selecionado
         """
-        Valida e converte a lista de dias da semana selecionados
-        em uma string separada por vírgulas (ex: 'SEG,QUA,SEX').
-
-        Returns:
-            str: Dias formatados como string
-
-        Raises:
-            forms.ValidationError: Se nenhum dia for selecionado
+		days = self.cleaned_data.get('days_of_week', [])
+		if not days:
+			raise ValidationError("Selecione pelo menos um dia da semana.")
+		return ",".join(days)
+	
+	def clean(self):
+		"""
+        Validação cruzada dos campos
+        - Verifica se a data final é maior que a data inicial
         """
-        dias = self.cleaned_data.get('days_of_week', [])
-        if not dias:
-            raise forms.ValidationError("Selecione ao menos um dia da semana.")
-        return ",".join(dias)
+		cleaned_data = super().clean()
+		start_date = cleaned_data.get('start_date')
+		end_date = cleaned_data.get('end_date')
+		
+		if start_date and end_date and end_date < start_date:
+			raise ValidationError("A data final deve ser posterior à data inicial.")
+		
+		return cleaned_data

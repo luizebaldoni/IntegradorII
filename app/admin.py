@@ -1,28 +1,57 @@
-from django.contrib import admin
-from .models import Sensor, SensorData, Device, DeviceLog, DeviceConfig, GlobalConfig, AlarmSchedule
-
 """
-REGISTRO DE MODELOS NO ADMINISTRADOR DJANGO – SISTEMA DE MONITORAMENTO IoT
+PAINEL ADMINISTRATIVO DJANGO - SISTEMA DE SIRENE ESCOLAR
 
 DESCRIÇÃO:
-Este módulo registra todos os modelos de dados no painel administrativo do Django,
-permitindo a visualização, edição e gerenciamento via interface web.
+Configuração do painel administrativo do Django para gerenciamento dos dados do sistema.
 
 MODELOS REGISTRADOS:
-- Sensor: sensores físicos utilizados no sistema
-- SensorData: registros de medições coletadas
-- Device: dispositivos IoT (ex: ESP32)
-- DeviceLog: eventos e mensagens de log dos dispositivos
-- DeviceConfig: configurações individuais por dispositivo
-- GlobalConfig: parâmetros globais do sistema
-- AlarmSchedule: agendamento de eventos automáticos
+- AlarmSchedule: Agendamentos de toques
+- SirenStatus: Status atual da sirene
+- ComandoESP: Comandos enviados para os dispositivos
+- Device: Dispositivos IoT cadastrados
 """
 
-# Registro dos modelos no painel administrativo Django
+from django.contrib import admin
+from .models import (
+    AlarmSchedule, 
+    SirenStatus, 
+    ComandoESP,
+    Device,
+    Sensor,
+    SensorData,
+    DeviceConfig,
+    DeviceLog,
+    GlobalConfig
+)
+
+class AlarmScheduleAdmin(admin.ModelAdmin):
+    """Configuração do admin para agendamentos"""
+    list_display = ('event_type', 'time', 'days_of_week', 'start_date', 'end_date', 'active')
+    list_filter = ('active', 'event_type')
+    search_fields = ('event_type', 'days_of_week')
+    ordering = ('time',)
+
+class SirenStatusAdmin(admin.ModelAdmin):
+    """Configuração do admin para status da sirene"""
+    list_display = ('is_on', 'last_activated')
+    readonly_fields = ('last_activated',)
+
+class ComandoESPAdmin(admin.ModelAdmin):
+    """Configuração do admin para comandos"""
+    list_display = ('comando', 'executado', 'timestamp')
+    readonly_fields = ('timestamp',)
+    list_filter = ('executado', 'timestamp')
+    date_hierarchy = 'timestamp'
+    ordering = ('-timestamp',)
+    search_fields = ('comando',)
+
+# Registro dos modelos
+admin.site.register(AlarmSchedule, AlarmScheduleAdmin)
+admin.site.register(SirenStatus, SirenStatusAdmin)
+admin.site.register(ComandoESP, ComandoESPAdmin)
+admin.site.register(Device)
 admin.site.register(Sensor)
 admin.site.register(SensorData)
-admin.site.register(Device)
-admin.site.register(DeviceLog)
 admin.site.register(DeviceConfig)
+admin.site.register(DeviceLog)
 admin.site.register(GlobalConfig)
-admin.site.register(AlarmSchedule)

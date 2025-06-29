@@ -1,28 +1,39 @@
-from django.urls import path
-from .views import *
-
 """
-ROTAS DO APLICATIVO PRINCIPAL – SISTEMA DE MONITORAMENTO IoT
+ROTAS DO SISTEMA DE SIRENE ESCOLAR
 
 DESCRIÇÃO:
-Este módulo define as rotas específicas do aplicativo principal (`app`), incluindo
-a visualização da página inicial, o gerenciamento de agendamentos e a execução imediata
-de eventos programados (ex: tocar alarme).
+Configuração das URLs do sistema, incluindo:
+- Rotas para interface web
+- Endpoints para API
+- URLs administrativas
 
-ROTAS DEFINIDAS:
-- /                        : página inicial do sistema (dashboard)
-- /agendamentos/           : listagem de eventos agendados
-- /agendamentos/novo/      : criação de novo evento
-- /agendamentos/editar/<id>: edição de evento existente
-- /agendamentos/remover/<id>: remoção de evento
-- /tocar/                  : execução imediata do toque (alarme manual)
+ROTAS PRINCIPAIS:
+- /: Página inicial
+- /agendamentos/: Gerenciamento de agendamentos
+- /api/comando: Endpoint para dispositivos ESP
+- /ativar/: Ativação manual da sirene
 """
+
+from django.urls import path
+from .views import (
+	HomeView,
+	AlarmListView,
+	AlarmCreateView,
+	AlarmUpdateView,
+	AlarmDeleteView,
+	comando_esp,
+	ativar_campainha
+	)
+
 urlpatterns = [
-    path('', HomeView.as_view(), name='home'),
-    path('agendamentos/', AlarmListView.as_view(), name='alarm-list'),
-    path('agendamentos/novo/', AlarmCreateView.as_view(), name='alarm-create'),
-    path('agendamentos/editar/<int:pk>/', AlarmUpdateView.as_view(), name='alarm-update'),
-    path('agendamentos/remover/<int:pk>/', AlarmDeleteView.as_view(), name='alarm-delete'),
-	path('api/comando', comando_esp, name = 'comando-esp'),  # <- esta é a rota para o ESP
-	path('ativar/', ativar_campainha, name='ativar-campainha'),
-]
+		# Páginas web
+		path('', HomeView.as_view(), name = 'home'),
+		path('agendamentos/', AlarmListView.as_view(), name = 'alarm-list'),
+		path('agendamentos/novo/', AlarmCreateView.as_view(), name = 'alarm-create'),
+		path('agendamentos/editar/<int:pk>/', AlarmUpdateView.as_view(), name = 'alarm-update'),
+		path('agendamentos/remover/<int:pk>/', AlarmDeleteView.as_view(), name = 'alarm-delete'),
+		
+		# API endpoints
+		path('api/comando', comando_esp, name = 'comando-esp'),
+		path('ativar/', ativar_campainha, name = 'ativar-campainha'),
+		]
