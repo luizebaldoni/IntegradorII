@@ -17,36 +17,46 @@
             <h2>➕ Agendamentos já cadastrados</h2>
 
             {% if alarms %}
-                <div class="horarios-grid">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Tipo</th>
-                                <th>Horário</th>
-                                <th>Dias</th>
-                                <th>Período</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for alarm in alarms %}
-                                <tr>
-                                    <td>{{ alarm.get_event_type_display }}</td>
-                                    <td>{{ alarm.time|time:'H:i' }}</td>
-                                    <td>{{ alarm.days_of_week }}</td>
-                                    <td>{{ alarm.start_date }} → {{ alarm.end_date }}</td>
-                                    <td>
-                                        <a href="{% url 'app:alarm-update' alarm.pk %}" class="btn btn-sm">Editar</a>
-                                        <a href="{% url 'app:alarm-delete' alarm.pk %}" class="btn btn-sm">Excluir</a>
-                                    </td>
-                                </tr>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Horário</th>
+                        <th>Dias</th>
+                        <th>Período</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for alarm in alarms %}
+                    <tr>
+                        <td>{{ alarm.get_event_type_display }}</td>
+                        <td>{{ alarm.time|time:"H:i" }}</td>
+                        <td>
+                            {% for day in alarm.days_of_week.split %}
+                                <span class="badge bg-primary">{{ day }}</span>
                             {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <p>Nenhum agendamento cadastrado.</p>
-            {% endif %}
+                        </td>
+                        <td>{{ alarm.start_date|date:"d/m/Y" }} a {{ alarm.end_date|date:"d/m/Y" }}</td>
+                        <td>
+                            <a href="{% url 'app:alarm-update' alarm.pk %}" class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i> Editar
+                            </a>
+                            <a href="{% url 'app:alarm-delete' alarm.pk %}" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i> Excluir
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+{% else %}
+    <div class="alert alert-info">
+        Nenhum agendamento ativo encontrado para hoje.
+    </div>
+{% endif %}
             <div class="form-group mt-3">
                 <a href="{% url 'app:alarm-create' %}" class="btn">➕ Criar novo Agendamento</a>
             </div>

@@ -118,7 +118,7 @@ class AlarmSchedule(models.Model):
         FIM_AULA = 'FIM', 'Fim de Aula'
         RECREIO = 'RECREIO', 'Recreio'
         TROCA_TURNO = 'TURNO', 'Troca de Turno'
-
+    
     DAYS_CHOICES = [
         ('SEG', 'Segunda-feira'),
         ('TER', 'Terça-feira'),
@@ -128,7 +128,11 @@ class AlarmSchedule(models.Model):
         ('SAB', 'Sábado'),
         ('DOM', 'Domingo'),
     ]
-
+    active = models.BooleanField(
+            default = True,  # novos agendamentos serao ativos automaticamente
+            verbose_name = "Ativo",
+            help_text = "Desmarque para desativar temporariamente este agendamento"
+            )
     event_type = models.CharField(
         max_length=10,
         choices=EventType.choices,
@@ -164,3 +168,9 @@ class AlarmSchedule(models.Model):
             "end_date": self.end_date.strftime('%Y-%m-%d'),
             "active": self.active
         }
+    
+    def save(self, *args, **kwargs):
+        """Garante que todo agendamento seja criado como ativo"""
+        if not self.pk:  # Se for um novo registro
+            self.active = True
+        super().save(*args, **kwargs)

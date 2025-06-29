@@ -24,12 +24,14 @@ from .models import (
     GlobalConfig
 )
 
+
 class AlarmScheduleAdmin(admin.ModelAdmin):
-    """Configuração do admin para agendamentos"""
-    list_display = ('event_type', 'time', 'days_of_week', 'start_date', 'end_date', 'active')
-    list_filter = ('active', 'event_type')
-    search_fields = ('event_type', 'days_of_week')
-    ordering = ('time',)
+    list_display = ('event_type', 'time', 'days_of_week', 'active', 'is_active')  # Adicionei 'active' aqui
+    list_editable = ('active',)  # Agora está correto pois 'active' está em list_display
+    
+    @admin.display(boolean = True, description = 'Ativo?')
+    def is_active(self, obj):
+        return obj.active
 
 class SirenStatusAdmin(admin.ModelAdmin):
     """Configuração do admin para status da sirene"""

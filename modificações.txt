@@ -1,5 +1,16 @@
-projeto integrador II
+from django.db import migrations
 
-/app/models.py
-/templates/schedules/...
-/templates/base.html
+def set_default_active(apps, schema_editor):
+    AlarmSchedule = apps.get_model('app', 'AlarmSchedule')
+    # Garante que o padrão seja aplicado a novos registros
+    # (Não altera existentes pois você já fez isso via shell)
+    pass  
+
+class Migration(migrations.Migration):
+    dependencies = [
+        ('app', '000X_previous_migration'),  # Mantenha a última migração real
+    ]
+
+    operations = [
+        migrations.RunPython(set_default_active),
+    ]

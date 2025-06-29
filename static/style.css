@@ -185,3 +185,13 @@ body {
 .delete-btn:hover {
     background: #c0392b;
 }
+
+.day-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    margin: 2px;
+    background: #6c757d;
+    color: white;
+    border-radius: 3px;
+    font-size: 0.8em;
+}

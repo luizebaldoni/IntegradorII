@@ -113,18 +113,43 @@ def ativar_campainha(request):
 
 
 class HomeView(APIView):
-	"""View para a página inicial do sistema"""
-	template_name = 'index.html'
-	
 	def get(self, request):
-		context = {
-				'alarms': AlarmSchedule.objects.filter(active = True).order_by('time'),
-				'siren_status': SirenStatus.objects.first().is_on if SirenStatus.objects.exists() else False,
-				'titulo': 'Sistema de Sirene Escolar'
+		# Converter dia atual para formato do sistema (ex: "DOM")
+		weekday_map = {
+				'Monday': 'SEG',
+				'Tuesday': 'TER',
+				'Wednesday': 'QUA',
+				'Thursday': 'QUI',
+				'Friday': 'SEX',
+				'Saturday': 'SAB',
+				'Sunday': 'DOM'
 				}
-		return render(request, self.template_name, context)
-
-
+		today = timezone.now().strftime('%A')
+		today_abbr = weekday_map.get(today, today)
+		
+		# Query corrigida
+		alarms = AlarmSchedule.objects.filter(
+				active = True,
+				start_date__lte = timezone.now().date(),
+				end_date__gte = timezone.now().date(),
+				days_of_week__contains = today_abbr
+				).order_by('time')
+		# Log de agendamentos inativos
+		inativos = AlarmSchedule.objects.filter(active = False)
+		if inativos.exists():
+			print(f"\nAGENDAMENTOS INATIVOS ENCONTRADOS:")
+			for alarm in inativos:
+				print(f"- ID {alarm.id}: {alarm.time} ({alarm.days_of_week})")
+		# DEBUG - Mostrar query no console
+		print(f"Agendamentos encontrados: {alarms.count()}")
+		for alarm in alarms:
+			print(f"- {alarm.event_type} às {alarm.time}")
+	
+		return render(request, 'index.html', {
+				'alarms': alarms,
+				'titulo': 'Sistema de Sirene Escolar'
+				})
+	
 class AlarmListView(ListView):
 	"""Lista todos os agendamentos"""
 	model = AlarmSchedule
