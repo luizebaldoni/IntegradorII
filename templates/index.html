@@ -62,9 +62,9 @@
             </div>
         </div>
     </div>
-<form action="{% url 'app:ativar-campainha' %}" method="post">
+<form id="sirenForm" action="{% url 'app:ativar-campainha' %}" method="post">
   {% csrf_token %}
-  <button class="btn btn-primary">Tocar campainha</button>
+  <button type="button" class="btn btn-primary" onclick="triggerSiren()">Tocar campainha</button>
 </form>
 </div>
 {% endblock %}

@@ -30,6 +30,35 @@ function carregarHorarios() {
     }
     atualizarInterface();
 }
+function triggerSiren() {
+  // Feedback visual imediato
+  const btn = document.querySelector('#sirenForm button');
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Acionando...';
+  btn.disabled = true;
+
+  // Envia a requisição
+  fetch("{% url 'app:ativar-campainha' %}", {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams(new FormData(document.getElementById('sirenForm')))
+  })
+  .then(response => {
+    if (response.ok) {
+      btn.innerHTML = '✔ Campainha acionada!';
+      setTimeout(() => {
+        btn.innerHTML = 'Tocar campainha';
+        btn.disabled = false;
+      }, 2000);
+    }
+  })
+  .catch(error => {
+    btn.innerHTML = '❌ Erro';
+    console.error('Error:', error);
+  });
+}
 
 // Salvar horários no localStorage
 function salvarHorarios() {

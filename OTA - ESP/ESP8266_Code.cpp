@@ -1,5 +1,7 @@
 /*
  * SISTEMA DE SIRENE ESCOLAR - FIRMWARE ESP8266
+ * Autor: Luize Baldoni de Oliveira
+ * Engenharia de Computação – UFSM
  * Data: 28/06/2025
  *
  * DESCRIÇÃO:
@@ -7,7 +9,7 @@
  * - Conecta-se à rede WiFi
  * - Sincroniza horário via NTP
  * - Consulta agendamentos no servidor Django
- * - Ativa/desativa a saída digital conforme agendamento
+ * - Ativa/desativa saída digital conforme agendamento
  *
  * FUNCIONALIDADES:
  * - Atualização OTA (Over-The-Air)
@@ -31,7 +33,7 @@
 ///// CONFIGURAÇÕES DE REDE /////
 const char* ssid = "SSID";        // SSID da rede Wi-Fi à qual o ESP8266 se conectará
 const char* password = "SENHA";             // Senha da rede Wi-Fi
-const String serverUrl = "http://IP:PORTA/api/comando"; // URL do servidor Django
+const String serverUrl = "http://IP_DO_SERVIDOR/api/comando"; // URL do servidor Django
 
 ///// CONFIGURAÇÃO DO PINO DE SAÍDA E TIMEOUT /////
 const int outputPin = 5;                         // Pino de controle da sirene (saída digital)
@@ -42,9 +44,13 @@ const unsigned long requestInterval = 30000;     // Intervalo entre requisiçõe
 bool outputState = false;                        // Estado atual da saída (ligado ou desligado)
 unsigned long outputStartTime = 0;               // Armazena o tempo em que a saída foi ativada
 unsigned long lastRequestTime = 0;               // Armazena o tempo da última requisição ao servidor
+int lastActivatedMinute = -1;                    // Armazena o último minuto de ativação
 
 WiFiUDP ntpUDP;                                  // Objeto UDP para comunicação com o servidor NTP
-NTPClient timeClient(ntpUDP, "pool.ntp.org", -3 * 3600);  // Cliente NTP configurado para UTC-3 (Brasília)
+NTPClient timeClient(ntpUDP, "br.pool.ntp.org", -3 * 3600);  // Cliente NTP configurado para UTC-3 (Brasília)
+
+///// MAPEAMENTO DE DIAS DA SEMANA /////
+const char* DAYS_OF_WEEK[7] = {"DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"};
 
 ///// FUNÇÃO DE INICIALIZAÇÃO /////
 void setup() {
@@ -148,25 +154,42 @@ void setupNTP() {
 void checkSchedules() {
   HTTPClient http;
   WiFiClient client;
+
   http.begin(client, serverUrl);             // Inicia a requisição HTTP ao servidor Django
+  http.setTimeout(10000);                    // Define o tempo limite para a requisição (10 segundos)
   int httpCode = http.GET();                 // Envia a requisição GET ao servidor
 
   if (httpCode == HTTP_CODE_OK) {            // Verifica se a resposta foi bem-sucedida (código HTTP 200)
     String payload = http.getString();       // Obtém o conteúdo da resposta (JSON)
-    Serial.println("Resposta da API: " + payload);
-
     DynamicJsonDocument doc(1024);            // Cria um documento JSON para parsear a resposta
     deserializeJson(doc, payload);           // Deserializa o JSON recebido
 
-    // Exibe a hora do servidor e a hora local
-    Serial.println("Hora do servidor: " + doc["current_time"].as<String>());
-    Serial.println("Hora local ESP: " + timeClient.getFormattedTime());
+    String currentTime = timeClient.getFormattedTime(); // Obtém o horário atual formatado "HH:MM:SS"
+    String currentHourMin = currentTime.substring(0, 5); // Extrai a hora e minuto "HH:MM"
+    int currentMinute = timeClient.getMinutes();  // Obtém o minuto atual
+    int currentDayIndex = timeClient.getDay(); // 0=Domingo
+    String currentDay = DAYS_OF_WEEK[currentDayIndex]; // Converte o índice do dia para o nome do dia
 
-    // Verifica os agendamentos e executa os comandos de acordo
-    JsonArray agendamentos = doc["agendamentos"];
-    if (agendamentos.size() == 0) {
-      Serial.println("Nenhum agendamento encontrado para hoje!");
+    Serial.println("MENSAGEM DO SISTEMA - Horário: " + currentTime + " | Dia: " + currentDay);
+
+    // Verifica a cada 10 segundos (para maior confiabilidade)
+    if (timeClient.getSeconds() <= 10 && currentMinute != lastActivatedMinute) {
+      JsonArray agendamentos = doc["agendamentos"]; // Obtém o array de agendamentos do JSON
+      for (JsonObject ag : agendamentos) {
+        String agTime = ag["time"].as<String>(); // Hora do agendamento no formato "HH:MM"
+        String agDays = ag["days_of_week"][0].as<String>(); // Dias da semana em que o agendamento ocorre
+
+        // Verifica se o dia atual está nos dias agendados e se a hora atual coincide com o agendamento
+        if (currentDayIndex == agDays && currentHourMin == agTime) {
+          activateOutput();  // Ativa a saída (sirene)
+          lastActivatedMinute = currentMinute; // Armazena o minuto atual para evitar múltiplos acionamentos no mesmo minuto
+          Serial.println("MENSAGEM DO SISTEMA - Acionamento para: " + agTime + " | Dias: " + agDays);
+          break;
+        }
+      }
     }
+  } else {
+    Serial.println("Erro HTTP: " + String(httpCode));  // Exibe o código de erro em caso de falha na requisição HTTP
   }
   http.end();  // Finaliza a requisição HTTP
 }
