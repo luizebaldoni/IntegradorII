@@ -1,7 +1,5 @@
 /*
  * SISTEMA DE SIRENE ESCOLAR - FIRMWARE ESP8266
- * Autor: Luize Baldoni de Oliveira
- * Engenharia de Computação – UFSM
  * Data: 28/06/2025
  *
  * DESCRIÇÃO:
