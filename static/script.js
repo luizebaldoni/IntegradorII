@@ -31,32 +31,31 @@ function carregarHorarios() {
     atualizarInterface();
 }
 function triggerSiren() {
-  // Feedback visual imediato
-  const btn = document.querySelector('#sirenForm button');
-  btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Acionando...';
-  btn.disabled = true;
+  const btnText = document.getElementById('sirenButtonText');
+  const spinner = document.getElementById('sirenSpinner');
 
-  // Envia a requisição
+  btnText.textContent = "Enviando...";
+  spinner.classList.remove('d-none');
+
   fetch("{% url 'app:ativar-campainha' %}", {
     method: 'POST',
     headers: {
-      'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-      'Content-Type': 'application/x-www-form-urlencoded',
+      'X-CSRFToken': '{{ csrf_token }}',
+      'Content-Type': 'application/json',
     },
-    body: new URLSearchParams(new FormData(document.getElementById('sirenForm')))
+    body: JSON.stringify({source: 'manual'})
   })
-  .then(response => {
-    if (response.ok) {
-      btn.innerHTML = '✔ Campainha acionada!';
-      setTimeout(() => {
-        btn.innerHTML = 'Tocar campainha';
-        btn.disabled = false;
-      }, 2000);
-    }
+  .then(response => response.json())
+  .then(data => {
+    btnText.textContent = "Sirene acionada!";
+    setTimeout(() => {
+      btnText.textContent = "Tocar Sirene";
+      spinner.classList.add('d-none');
+    }, 3000);
   })
   .catch(error => {
-    btn.innerHTML = '❌ Erro';
-    console.error('Error:', error);
+    btnText.textContent = "Erro! Tentar novamente";
+    spinner.classList.add('d-none');
   });
 }
 

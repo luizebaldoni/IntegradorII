@@ -85,31 +85,45 @@ def comando_esp(request):
 
 @csrf_exempt
 def ativar_campainha(request):
-	"""
-	Ativação manual da sirene/campainha
-
-	Funcionalidades:
-	- Ativa a sirene por 1 segundo
-	- Registra o comando no banco de dados
-	- Atualiza o status da sirene
-	"""
 	if request.method == 'POST':
 		try:
-			# Atualiza o status da sirene
-			siren, _ = SirenStatus.objects.get_or_create(id = 1)
-			siren.is_on = True
-			siren.save()
+			# Cria/Atualiza o comando
+			comando, _ = ComandoESP.objects.get_or_create(id = 1)
+			comando.comando = 'ligar'
+			comando.source = 'manual'  # Novo campo para identificar origem
+			comando.save()
 			
-			# Cria registro do comando
-			ComandoESP.objects.create(comando = 'ligar', executado = False)
+			# Atualiza status
+			SirenStatus.objects.update_or_create(
+					id = 1,
+					defaults = {'is_on': True, 'last_activated': timezone.now()}
+					)
 			
-			messages.success(request, "Campainha acionada com sucesso!")
-			return redirect('app:home')
-		
+			return JsonResponse({'status': 'success'})
 		except Exception as e:
-			messages.error(request, f"Erro ao acionar campainha: {str(e)}")
-			return redirect('app:home')
-	return JsonResponse({'status': 'error', 'message': 'Método não permitido'}, status = 405)
+			return JsonResponse({'status': 'error', 'message': str(e)}, status = 500)
+	return JsonResponse({'status': 'error'}, status = 405)
+
+
+def check_command(request):
+    comando = ComandoESP.objects.first()
+    if comando and comando.comando == 'ligar':
+        response = {
+            'command': 'ligar',
+            'source': comando.source
+        }
+        return JsonResponse(response)
+    return JsonResponse({'command': 'desligar'})
+
+@csrf_exempt
+def confirm_command(request):
+    if request.method == 'POST':
+        comando = ComandoESP.objects.first()
+        if comando:
+            comando.comando = 'desligar'
+            comando.save()
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error'}, status=400)
 
 
 class HomeView(APIView):

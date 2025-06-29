@@ -1,6 +1,7 @@
 /*
  * SISTEMA DE SIRENE ESCOLAR - FIRMWARE ESP8266
- * Data: 28/06/2025
+ * Engenharia de Computação – UFSM
+ * Data da ultima atualização: 29/06/2025
  *
  * DESCRIÇÃO:
  * Este firmware controla um dispositivo ESP8266 que:
@@ -29,9 +30,9 @@
 #include <NTPClient.h>
 
 ///// CONFIGURAÇÕES DE REDE /////
-const char* ssid = "SSID";        // SSID da rede Wi-Fi à qual o ESP8266 se conectará
-const char* password = "SENHA";             // Senha da rede Wi-Fi
-const String serverUrl = "http://IP_DO_SERVIDOR/api/comando"; // URL do servidor Django
+const char* ssid = "GPSNet_127217_2.4GHz";        // SSID da rede Wi-Fi à qual o ESP8266 se conectará
+const char* password = "17r17icl2122";             // Senha da rede Wi-Fi
+const String serverUrl = "http://192.168.1.12:8000/api/comando"; // URL do servidor Django
 
 ///// CONFIGURAÇÃO DO PINO DE SAÍDA E TIMEOUT /////
 const int outputPin = 5;                         // Pino de controle da sirene (saída digital)
@@ -81,6 +82,7 @@ void loop() {
 
     if (WiFi.status() == WL_CONNECTED) {       // Verifica se o ESP8266 está conectado ao Wi-Fi
       checkSchedules();                         // Consulta o servidor para obter agendamentos
+      checkManualCommand();                     // Verifica se há comandos manuais no servidor
     } else {
       Serial.println("WiFi desconectado, tentando reconectar...");
       connectWiFi();                           // Tenta reconectar ao Wi-Fi se desconectado
@@ -164,30 +166,25 @@ void checkSchedules() {
 
     String currentTime = timeClient.getFormattedTime(); // Obtém o horário atual formatado "HH:MM:SS"
     String currentHourMin = currentTime.substring(0, 5); // Extrai a hora e minuto "HH:MM"
-    int currentMinute = timeClient.getMinutes();  // Obtém o minuto atual
     int currentDayIndex = timeClient.getDay(); // 0=Domingo
     String currentDay = DAYS_OF_WEEK[currentDayIndex]; // Converte o índice do dia para o nome do dia
 
-    Serial.println("MENSAGEM DO SISTEMA - Horário: " + currentTime + " | Dia: " + currentDay);
-
-    // Verifica a cada 10 segundos (para maior confiabilidade)
-    if (timeClient.getSeconds() <= 10 && currentMinute != lastActivatedMinute) {
+    if (timeClient.getSeconds() <= 5) { // Janela de 5 segundos
       JsonArray agendamentos = doc["agendamentos"]; // Obtém o array de agendamentos do JSON
       for (JsonObject ag : agendamentos) {
         String agTime = ag["time"].as<String>(); // Hora do agendamento no formato "HH:MM"
         String agDays = ag["days_of_week"][0].as<String>(); // Dias da semana em que o agendamento ocorre
 
-        // Verifica se o dia atual está nos dias agendados e se a hora atual coincide com o agendamento
         if (currentDayIndex == agDays && currentHourMin == agTime) {
-          activateOutput();  // Ativa a saída (sirene)
-          lastActivatedMinute = currentMinute; // Armazena o minuto atual para evitar múltiplos acionamentos no mesmo minuto
-          Serial.println("MENSAGEM DO SISTEMA - Acionamento para: " + agTime + " | Dias: " + agDays);
+          if (timeClient.getMinutes() != lastActivatedMinute) {
+            activateOutput();  // Ativa a saída (sirene)
+            lastActivatedMinute = timeClient.getMinutes(); // Armazena o minuto atual
+            Serial.printf("[AGENDADO] %s %s\n", agDays.c_str(), agTime.c_str());
+          }
           break;
         }
       }
     }
-  } else {
-    Serial.println("Erro HTTP: " + String(httpCode));  // Exibe o código de erro em caso de falha na requisição HTTP
   }
   http.end();  // Finaliza a requisição HTTP
 }
@@ -209,4 +206,32 @@ void deactivateOutput() {
     digitalWrite(outputPin, LOW);            // Desliga a saída (sirene)
     outputState = false;                     // Atualiza o estado da saída para desligado
   }
+}
+
+///// FUNÇÃO PARA VERIFICAR COMANDO MANUAL NO SERVIDOR /////
+void checkManualCommand() {
+  HTTPClient http;
+  WiFiClient client;
+
+  http.begin(client, serverUrl + "/check-command"); // Endpoint para verificar comando manual
+  http.setTimeout(5000); // Timeout reduzido para comandos manuais
+
+  int httpCode = http.GET();
+  if (httpCode == HTTP_CODE_OK) {
+    String payload = http.getString();
+    DynamicJsonDocument doc(128);
+    deserializeJson(doc, payload);
+
+    if (doc["command"] == "ligar" && doc["source"] == "manual") {
+      activateOutput();
+      Serial.println("[MANUAL] Sirene acionada por comando manual");
+
+      // Envia confirmação de recebimento
+      HTTPClient post;
+      post.begin(client, serverUrl + "/confirm-command");
+      post.POST("");
+      post.end();
+    }
+  }
+  http.end();
 }
