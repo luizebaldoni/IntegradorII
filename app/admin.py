@@ -26,13 +26,12 @@ from .models import (
 
 
 class AlarmScheduleAdmin(admin.ModelAdmin):
-    list_display = ('event_type', 'time', 'days_of_week', 'active', 'is_active')  # Adicionei 'active' aqui
-    list_editable = ('active',)  # Agora está correto pois 'active' está em list_display
-    
-    @admin.display(boolean = True, description = 'Ativo?')
-    def is_active(self, obj):
-        return obj.active
-
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        if obj is None:  # Somente durante a CRIAÇÃO
+            form.base_fields['active'].initial = True
+            form.base_fields['active'].disabled = True  # Opcional: bloqueia alteração
+        return form
 class SirenStatusAdmin(admin.ModelAdmin):
     """Configuração do admin para status da sirene"""
     list_display = ('is_on', 'last_activated')

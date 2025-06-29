@@ -166,10 +166,9 @@ class AlarmCreateView(CreateView):
 	success_url = reverse_lazy('app:alarm-list')
 	
 	def form_valid(self, form):
-		"""Validação adicional do formulário"""
-		response = super().form_valid(form)
-		messages.success(self.request, "Agendamento criado com sucesso!")
-		return response
+			"""Garante ativação mesmo se form enviar active=False"""
+			form.instance.active = True
+			return super().form_valid(form)
 
 
 class AlarmUpdateView(UpdateView):
@@ -181,9 +180,9 @@ class AlarmUpdateView(UpdateView):
 	
 	def form_valid(self, form):
 		"""Validação adicional do formulário"""
-		response = super().form_valid(form)
 		messages.success(self.request, "Agendamento atualizado com sucesso!")
-		return response
+		form.instance.active = True
+		return super().form_valid(form)
 
 
 class AlarmDeleteView(DeleteView):

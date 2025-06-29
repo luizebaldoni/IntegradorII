@@ -129,9 +129,8 @@ class AlarmSchedule(models.Model):
         ('DOM', 'Domingo'),
     ]
     active = models.BooleanField(
-            default = True,  # novos agendamentos serao ativos automaticamente
-            verbose_name = "Ativo",
-            help_text = "Desmarque para desativar temporariamente este agendamento"
+            default = True,  # Garante que o banco de dados crie como ativo
+            verbose_name = "Ativo"
             )
     event_type = models.CharField(
         max_length=10,
@@ -170,7 +169,7 @@ class AlarmSchedule(models.Model):
         }
     
     def save(self, *args, **kwargs):
-        """Garante que todo agendamento seja criado como ativo"""
-        if not self.pk:  # Se for um novo registro
+        """Garante que o agendamento sempre seja ativo ao criar ou atualizar"""
+        if not self.pk or not hasattr(self, 'active'):  # Novo registro ou campo não especificado
             self.active = True
         super().save(*args, **kwargs)
