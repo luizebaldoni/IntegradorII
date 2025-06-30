@@ -91,13 +91,14 @@ class GlobalConfig(models.Model):
         return "Configuração Global"
 
 class ComandoESP(models.Model):
-    """Armazena o último comando enviado para o ESP"""
     comando = models.CharField(max_length=10, default='desligar')
+    source = models.CharField(max_length=20, default='unknown', verbose_name='Origem do comando')
     executado = models.BooleanField(default=False)
     timestamp = models.DateTimeField(auto_now_add=True)
+    duration = models.IntegerField(default=60, verbose_name='Duração (minutos)')
 
     def __str__(self):
-        return f"Comando: {self.comando} (Executado: {self.executado})"
+        return f"Comando: {self.comando} (Fonte: {self.source})"
 
     class Meta:
         verbose_name = "Comando ESP"

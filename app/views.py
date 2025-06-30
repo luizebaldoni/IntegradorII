@@ -36,24 +36,16 @@ DAYS_MAP = {
 
 @csrf_exempt
 def comando_esp(request):
-	"""
-	Endpoint para o ESP consultar agendamentos ativos
-
-	Retorna:
-	- Lista de agendamentos ativos no formato JSON
-	- Status atual da sirene
-	- Próximo horário agendado
-	"""
 	if request.method != 'GET':
 		return JsonResponse({'error': 'Método não permitido'}, status = 405)
 	
 	try:
-		# Obtém o dia da semana atual no formato PT-BR
-		now = timezone.localtime(timezone.now())  # Converte para o fuso horário configurado
+		now = timezone.localtime(timezone.now())
 		weekday_en = now.strftime('%a')
 		weekday_pt = DAYS_MAP.get(weekday_en, weekday_en)
+		current_time = now.time()
 		
-		# Filtra agendamentos ativos para o dia atual
+		# Verifica agendamentos ativos
 		agendamentos = AlarmSchedule.objects.filter(
 				start_date__lte = now.date(),
 				end_date__gte = now.date(),
@@ -61,20 +53,30 @@ def comando_esp(request):
 				active = True
 				).order_by('time')
 		
-		# Prepara a resposta
+		# Verifica se há agendamento no horário atual
+		should_activate = False
+		for ag in agendamentos:
+			if (ag.time.hour == current_time.hour and
+					ag.time.minute == current_time.minute):
+				should_activate = True
+				break
+		
+		# Verifica comandos manuais pendentes
+		manual_command = ComandoESP.objects.filter(comando = 'ligar').first()
+		
 		response_data = {
 				'current_time': now.strftime('%H:%M'),
 				'current_day': weekday_pt,
+				'should_activate': should_activate or (manual_command is not None),
+				'is_scheduled': should_activate and not manual_command,
 				'sirene_status': SirenStatus.objects.first().is_on if SirenStatus.objects.exists() else False,
-				'agendamentos': [ag.to_json() for ag in agendamentos],
-				'proximo_toque': None
+				'next_alarm': None
 				}
 		
-		# Encontra o próximo agendamento
-		current_time = now.time()
+		# Encontra próximo agendamento
 		for ag in agendamentos:
 			if ag.time > current_time:
-				response_data['proximo_toque'] = ag.time.strftime('%H:%M')
+				response_data['next_alarm'] = ag.time.strftime('%H:%M')
 				break
 		
 		return JsonResponse(response_data)
@@ -82,27 +84,41 @@ def comando_esp(request):
 	except Exception as e:
 		return JsonResponse({'error': str(e)}, status = 500)
 
-
 @csrf_exempt
 def ativar_campainha(request):
 	if request.method == 'POST':
 		try:
-			# Cria/Atualiza o comando
-			comando, _ = ComandoESP.objects.get_or_create(id = 1)
-			comando.comando = 'ligar'
-			comando.source = 'manual'  # Novo campo para identificar origem
-			comando.save()
+			data = json.loads(request.body)
+			duration = data.get('duration', 60)  # Default 60 segundos
 			
+			# Cria/Atualiza o comando
+			comando = ComandoESP.objects.update_or_create(
+					id = 1,
+					defaults = {
+							'comando': 'ligar',
+							'source': data.get('source', 'manual'),
+							'timestamp': timezone.now()
+							}
+					)
+	
 			# Atualiza status
 			SirenStatus.objects.update_or_create(
 					id = 1,
-					defaults = {'is_on': True, 'last_activated': timezone.now()}
+					defaults = {
+							'is_on': True,
+							'last_activated': timezone.now(),
+							'activation_source': data.get('source', 'manual')
+							}
 					)
-			
-			return JsonResponse({'status': 'success'})
+			return JsonResponse({
+					'status': 'success',
+					'command_id': comando[0].id,
+					'duration': duration,
+					'timestamp': timezone.now().isoformat()
+					})
 		except Exception as e:
 			return JsonResponse({'status': 'error', 'message': str(e)}, status = 500)
-	return JsonResponse({'status': 'error'}, status = 405)
+	return JsonResponse({'status': 'error', 'message': 'Método não permitido'}, status = 405)
 
 
 def check_command(request):
@@ -110,7 +126,8 @@ def check_command(request):
     if comando and comando.comando == 'ligar':
         response = {
             'command': 'ligar',
-            'source': comando.source
+            'source': comando.source,
+		    'id': str(comando.id)
         }
         return JsonResponse(response)
     return JsonResponse({'command': 'desligar'})
@@ -124,7 +141,6 @@ def confirm_command(request):
             comando.save()
         return JsonResponse({'status': 'success'})
     return JsonResponse({'status': 'error'}, status=400)
-
 
 class HomeView(APIView):
 	def get(self, request):
@@ -171,7 +187,6 @@ class AlarmListView(ListView):
 	context_object_name = 'alarms'
 	ordering = ['time']
 
-
 class AlarmCreateView(CreateView):
 	"""Cria um novo agendamento"""
 	model = AlarmSchedule
@@ -183,7 +198,6 @@ class AlarmCreateView(CreateView):
 			"""Garante ativação mesmo se form enviar active=False"""
 			form.instance.active = True
 			return super().form_valid(form)
-
 
 class AlarmUpdateView(UpdateView):
 	"""Edita um agendamento existente"""
@@ -197,7 +211,6 @@ class AlarmUpdateView(UpdateView):
 		messages.success(self.request, "Agendamento atualizado com sucesso!")
 		form.instance.active = True
 		return super().form_valid(form)
-
 
 class AlarmDeleteView(DeleteView):
 	"""Remove um agendamento"""

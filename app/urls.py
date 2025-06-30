@@ -22,7 +22,7 @@ from .views import (
 	AlarmUpdateView,
 	AlarmDeleteView,
 	comando_esp,
-	ativar_campainha
+	ativar_campainha, check_command, confirm_command
 	)
 
 urlpatterns = [
@@ -36,4 +36,6 @@ urlpatterns = [
 		# API endpoints
 		path('api/comando', comando_esp, name = 'comando-esp'),
 		path('ativar/', ativar_campainha, name = 'ativar-campainha'),
+		path('check_command/', check_command, name='check_command'),
+		path('confirm_command/', confirm_command, name='confirm_command'),
 		]
