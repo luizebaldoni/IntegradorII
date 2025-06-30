@@ -2,36 +2,38 @@
 FORMULÁRIOS DO SISTEMA DE SIRENE ESCOLAR
 
 DESCRIÇÃO:
-Este módulo contém todos os formulários do sistema, incluindo:
-- Formulário para criação/edição de agendamentos
-- Validações customizadas para dados de agendamento
-- Controle de estado ativo/inativo dos agendamentos
+Este módulo define os formulários utilizados na interface web do sistema, com foco no gerenciamento
+de agendamentos de sirene (modelo AlarmSchedule). Inclui campos customizados, validações específicas
+e lógica de exibição conforme o contexto (criação vs. edição).
 
-FORMULÁRIOS:
-- AlarmForm: Formulário completo para manipulação de AlarmSchedule
+FORMULÁRIOS DEFINIDOS:
+- AlarmForm: Criação e edição de alarmes semanais com campos personalizados.
 """
 
 from django import forms
 from django.core.exceptions import ValidationError
 from .models import AlarmSchedule
 
+# ========================================================
+# FORMULÁRIO PARA CADASTRO E EDIÇÃO DE AGENDAMENTOS
+# ========================================================
 
 class AlarmForm(forms.ModelForm):
     """
-    Formulário completo para manipulação de AlarmSchedule
-    
-    Campos personalizados:
-    - days_of_week: Exibido como checkboxes múltiplos
-    - time: Campo de horário com input type='time'
-    - start_date/end_date: Campos de data com input type='date'
-    - active: Sempre inicializado como True (novos registros)
+    Formulário completo para criar ou editar agendamentos de sirene (AlarmSchedule).
+
+    Personalizações:
+    - 'days_of_week' como múltipla escolha com checkboxes
+    - Campos 'time', 'start_date', 'end_date' com widgets de HTML5 (time/date)
+    - Campo 'active' é ocultado na criação e bloqueado na edição
     """
 
+    # Campo personalizado com múltipla escolha e checkboxes
     days_of_week = forms.MultipleChoiceField(
         choices=AlarmSchedule.DAYS_CHOICES,
         widget=forms.CheckboxSelectMultiple,
         label='Dias da Semana',
-        help_text='Selecione os dias de repetição'
+        help_text='Selecione os dias em que o alarme será ativado'
     )
 
     class Meta:
@@ -42,24 +44,23 @@ class AlarmForm(forms.ModelForm):
             'start_date': forms.DateInput(attrs={'type': 'date'}),
             'end_date': forms.DateInput(attrs={'type': 'date'}),
         }
-    
+
     def __init__(self, *args, **kwargs):
-	    super().__init__(*args, **kwargs)
-	    if not self.instance.pk:  # Se for um novo registro
-		    self.fields['active'].initial = True
-		    self.fields['active'].widget = forms.HiddenInput()  # Oculta o campo
-	    else:
-		    self.fields['active'].disabled = True  # Bloqueia alteração para registros existentes
+        """Ajusta o comportamento do campo 'active' de acordo com o contexto"""
+        super().__init__(*args, **kwargs)
+        if not self.instance.pk:
+            # Oculta o campo ao criar novo agendamento
+            self.fields['active'].initial = True
+            self.fields['active'].widget = forms.HiddenInput()
+        else:
+            # Bloqueia edição para registros já existentes
+            self.fields['active'].disabled = True
 
     def clean_days_of_week(self):
         """
-        Valida e formata os dias da semana selecionados
-        
-        Retorna:
-        - String com dias separados por vírgula (ex: "SEG,QUA,SEX")
-        
-        Erros:
-        - ValidationError se nenhum dia for selecionado
+        Valida o campo 'days_of_week':
+        - Garante que ao menos um dia seja selecionado
+        - Converte lista para string separada por vírgulas
         """
         days = self.cleaned_data.get('days_of_week', [])
         if not days:
@@ -68,17 +69,16 @@ class AlarmForm(forms.ModelForm):
 
     def clean(self):
         """
-        Validação cruzada dos campos:
-        - Verifica se a data final é maior que a data inicial
-        - Garante coerência temporal nos agendamentos
+        Validação cruzada entre campos:
+        - Garante que 'end_date' seja posterior a 'start_date'
         """
         cleaned_data = super().clean()
         start_date = cleaned_data.get('start_date')
         end_date = cleaned_data.get('end_date')
-        
+
         if start_date and end_date and end_date < start_date:
             raise ValidationError({
                 'end_date': "A data final deve ser posterior à data inicial."
             })
-            
+
         return cleaned_data

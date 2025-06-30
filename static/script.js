@@ -1,3 +1,26 @@
+function ativarSirene() {
+    fetch('/ativar/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            duration: 30,
+            source: 'web_interface'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Sucesso:', data);
+        alert('Sirene ativada com sucesso!');
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro ao ativar sirene');
+    });
+}
+
 // Estrutura para armazenar os horários
 let horarios = {};
  // Função para carregar os agendamentos via API

@@ -1,32 +1,46 @@
-from django.db import models
-
 """
 MODELOS DE BANCO DE DADOS PARA SISTEMA DE MONITORAMENTO IoT
 
 DESCRIÇÃO:
-Este módulo define os modelos de dados utilizados em um sistema de monitoramento baseado em dispositivos IoT,
-permitindo o registro de dispositivos, sensores, dados sensoriais, configuração de operação e agendamentos de eventos.
+Este módulo define os modelos utilizados no sistema de sirene escolar, incluindo:
+- Cadastro e estado de dispositivos e sensores
+- Leitura de dados sensoriais
+- Agendamento de eventos automáticos (alarmSchedule)
+- Comando remoto para ESP (ComandoESP)
+- Controle de status da sirene (SirenStatus)
 
-MODELOS:
-- Device: representa um dispositivo físico (ex: ESP32)
-- Sensor: representa um sensor físico associado a um tipo de dado
-- SensorData: registros das leituras dos sensores
-- DeviceConfig: configurações específicas por dispositivo
-- DeviceLog: log de eventos por dispositivo
-- GlobalConfig: configurações gerais do sistema
-- AlarmSchedule: agendamento de eventos no calendário semanal
+MODELOS DEFINIDOS:
+- Device
+- Sensor
+- SensorData
+- DeviceConfig
+- DeviceLog
+- GlobalConfig
+- ComandoESP
+- SirenStatus
+- AlarmSchedule
 """
 
+from django.db import models
+
+# ========================================================
+# MODELO BASE ABSTRATO COM NOME E DATA DE CRIAÇÃO
+# ========================================================
+
 class Model(models.Model):
-    """Modelo base genérico com campos comuns"""
+    """Modelo genérico com campos comuns"""
     name = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         abstract = True
 
+# ========================================================
+# MODELOS RELACIONADOS A DISPOSITIVOS E SENSORES
+# ========================================================
+
 class Device(models.Model):
-    """Dispositivo IoT conectado ao sistema"""
+    """Dispositivo IoT (ex: ESP8266, ESP32)"""
     device_id = models.CharField(max_length=100, unique=True)
     device_name = models.CharField(max_length=100)
     last_seen = models.DateTimeField(auto_now=True)
@@ -36,7 +50,7 @@ class Device(models.Model):
         return f"{self.device_name} ({self.device_id})"
 
 class Sensor(models.Model):
-    """Sensor físico conectado a um dispositivo"""
+    """Sensor associado a um tipo de leitura"""
     name = models.CharField(max_length=100)
     sensor_type = models.CharField(max_length=100)
     value = models.FloatField()
@@ -46,7 +60,7 @@ class Sensor(models.Model):
         return f"{self.name} ({self.sensor_type}) - {self.value}"
 
 class SensorData(models.Model):
-    """Registro histórico de leituras de sensores"""
+    """Leitura histórica de sensores"""
     sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE)
     device = models.ForeignKey(Device, on_delete=models.CASCADE)
     value = models.FloatField()
@@ -56,7 +70,7 @@ class SensorData(models.Model):
         return f"{self.device.device_name} - {self.sensor.name}: {self.value} at {self.timestamp}"
 
     def to_dict(self):
-        """Converte os dados para formato de dicionário (API)"""
+        """Formata os dados para API"""
         return {
             'sensor_name': self.sensor.name,
             'device_name': self.device.device_name,
@@ -64,8 +78,12 @@ class SensorData(models.Model):
             'timestamp': self.timestamp.isoformat(),
         }
 
+# ========================================================
+# MODELOS DE CONFIGURAÇÃO E LOG
+# ========================================================
+
 class DeviceConfig(models.Model):
-    """Configurações específicas para cada dispositivo"""
+    """Configurações individuais por dispositivo"""
     device = models.OneToOneField(Device, on_delete=models.CASCADE)
     send_interval = models.IntegerField(default=60)
     temp_threshold = models.FloatField(default=30.0)
@@ -74,7 +92,7 @@ class DeviceConfig(models.Model):
         return f"Configuração para {self.device.device_name}"
 
 class DeviceLog(models.Model):
-    """Registro de logs e eventos dos dispositivos"""
+    """Logs de eventos dos dispositivos"""
     device = models.ForeignKey(Device, on_delete=models.CASCADE)
     log_message = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -90,36 +108,50 @@ class GlobalConfig(models.Model):
     def __str__(self):
         return "Configuração Global"
 
+# ========================================================
+# CONTROLE DE COMANDO E STATUS DA SIRENE
+# ========================================================
+
 class ComandoESP(models.Model):
+    """Comando enviado do Django para a ESP"""
     comando = models.CharField(max_length=10, default='desligar')
-    source = models.CharField(max_length=20, default='unknown', verbose_name='Origem do comando')
+    source = models.CharField(
+        max_length=20,
+        default='unknown',
+        null=True,
+        blank=True
+    )
     executado = models.BooleanField(default=False)
     timestamp = models.DateTimeField(auto_now_add=True)
-    duration = models.IntegerField(default=60, verbose_name='Duração (minutos)')
 
     def __str__(self):
-        return f"Comando: {self.comando} (Fonte: {self.source})"
+        return f"{self.comando} (Fonte: {self.get_source_display()})"
 
-    class Meta:
-        verbose_name = "Comando ESP"
-        verbose_name_plural = "Comandos ESP"
+    def get_source_display(self):
+        """Retorna a origem do comando"""
+        return self.source if self.source else 'indefinido'
 
 class SirenStatus(models.Model):
-    """Status atual da sirene/campainha"""
+    """Indica se a sirene está ligada atualmente"""
     is_on = models.BooleanField(default=False)
     last_activated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return "Ligada" if self.is_on else "Desligada"
 
+# ========================================================
+# AGENDAMENTO DE EVENTOS AUTOMÁTICOS
+# ========================================================
+
 class AlarmSchedule(models.Model):
-    """Agendamento de eventos automáticos para a sirene"""
+    """Agendamentos para toque automático da sirene"""
+
     class EventType(models.TextChoices):
         INICIO_AULA = 'INICIO', 'Início de Aula'
         FIM_AULA = 'FIM', 'Fim de Aula'
         RECREIO = 'RECREIO', 'Recreio'
         TROCA_TURNO = 'TURNO', 'Troca de Turno'
-    
+
     DAYS_CHOICES = [
         ('SEG', 'Segunda-feira'),
         ('TER', 'Terça-feira'),
@@ -129,10 +161,8 @@ class AlarmSchedule(models.Model):
         ('SAB', 'Sábado'),
         ('DOM', 'Domingo'),
     ]
-    active = models.BooleanField(
-            default = True,  # Garante que o banco de dados crie como ativo
-            verbose_name = "Ativo"
-            )
+
+    active = models.BooleanField(default=True, verbose_name="Ativo")
     event_type = models.CharField(
         max_length=10,
         choices=EventType.choices,
@@ -140,12 +170,11 @@ class AlarmSchedule(models.Model):
     )
     time = models.TimeField(verbose_name='Horário')
     days_of_week = models.CharField(
-        max_length=27,  # Máximo para "SEG,TER,QUA,QUI,SEX,SAB,DOM"
+        max_length=27,  # "SEG,TER,QUA,QUI,SEX,SAB,DOM"
         verbose_name='Dias da Semana'
     )
     start_date = models.DateField(verbose_name='Data de Início')
     end_date = models.DateField(verbose_name='Data de Término')
-    active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -153,11 +182,11 @@ class AlarmSchedule(models.Model):
         return f"{self.get_event_type_display()} às {self.time.strftime('%H:%M')}"
 
     def get_days_list(self):
-        """Retorna os dias da semana como lista"""
+        """Retorna os dias como lista"""
         return [day.strip() for day in self.days_of_week.split(',')]
 
     def to_json(self):
-        """Formata os dados para API"""
+        """Retorna os dados do agendamento em formato JSON para API"""
         return {
             "id": self.id,
             "event_type": self.event_type,
@@ -168,9 +197,9 @@ class AlarmSchedule(models.Model):
             "end_date": self.end_date.strftime('%Y-%m-%d'),
             "active": self.active
         }
-    
+
     def save(self, *args, **kwargs):
-        """Garante que o agendamento sempre seja ativo ao criar ou atualizar"""
-        if not self.pk or not hasattr(self, 'active'):  # Novo registro ou campo não especificado
+        """Garante que o agendamento esteja ativo por padrão"""
+        if not self.pk or not hasattr(self, 'active'):
             self.active = True
         super().save(*args, **kwargs)

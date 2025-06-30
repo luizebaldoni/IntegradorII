@@ -64,7 +64,7 @@
     </div>
 <form action="{% url 'app:ativar-campainha' %}" method="post">
   {% csrf_token %}
-  <button class="btn btn-primary">Tocar campainha</button>
+    <button onclick="ativarSirene()">Ativar Sirene</button>
 </form>
 </div>
 {% endblock %}
