@@ -1,125 +1,342 @@
-# 📣 School Buzzer
 
-**Campainha automática inteligente para escolas — programável via Web, com atualização OTA e controle em tempo real.**
+# 📣 Sistema de Sirene Escolar IoT
 
----
-
-## 🚀 Sobre o Projeto
-
-O **School Buzzer** é um sistema eletrônico inteligente desenvolvido para automatizar os toques de campainha em escolas, trazendo modernização, pontualidade e facilidade de controle por meio de uma interface web intuitiva. Ideal para instituições que buscam reduzir a dependência de toques manuais e manter rotinas organizadas com precisão.
+**Solução completa para automação de sirenes em instituições de ensino usando ESP8266 e Django**
 
 ---
 
-## ⚙️ Funcionalidades
+## 📌 Índice
 
-- ⏰ **Programação de Horários** via painel Web
-- 🌐 **Conectividade Wi-Fi** com ESP32
-- 🔄 **Atualização OTA (Over-The-Air)** do firmware
-- 🔊 **Ativação automática** de buzzer ou sirene conforme horários definidos
-- 📱 **Painel de controle responsivo** (mobile e desktop)
-- 📋 **Log de eventos**: registro de toques emitidos
-- 🔘 **Modo manual** para toques instantâneos
----
-
-## 🧠 Tecnologias Utilizadas
-
-### 📡 Hardware
-- [x] ESP32 com suporte OTA
-- [x] Buzzer 5V ou Sirene 12V
-- [x] Módulo Relé (caso sirene seja usada)
-- [x] Alimentação via fonte ou baterias 18650
-- [x] Protoboard / Fenolite / Jumpers
-
-### 💻 Software
-- 🔧 **Firmware em C++:** ESP8266 
-- 🌐 **Painel Web:** HTML, CSS, JavaScript
-- 🔙 **Back-End:** Python (Django)
-- 🗃️ **Banco de Dados:** SQLite3
-- 📶 **Comunicação:** HTTP/WebSocket
+- [Visão Geral](#-visão-geral)
+- [Tecnologias](#-tecnologias)
+- [Arquitetura](#-arquitetura)
+- [Instalação](#-instalação)
+- [Configuração](#-configuração)
+- [Uso](#-uso)
+- [API](#-api)
+- [Segurança](#-segurança)
+- [Troubleshooting](#-troubleshooting)
+- [Roadmap](#-roadmap)
+- [Licença](#-licença)
 
 ---
 
-## 🛠️ Como Funciona
+## 🌐 Visão Geral
 
-1. A diretoria acessa o painel web e cadastra os horários de toque.
-2. O servidor salva as configurações no banco de dados.
-3. O ESP32 sincroniza os dados via Wi-Fi.
-4. A cada ciclo de tempo, o microcontrolador verifica os horários e aciona a campainha automaticamente.
-5. Atualizações no sistema podem ser feitas remotamente via OTA.
+Sistema IoT para controle automatizado de sirenes escolares com:
 
----
-
-## 🧰 Lista de Materiais
-
-| Item | Descrição | Qtde |
-|------|-----------|------|
-| ESP32 | Microcontrolador Wi-Fi | 1 |
-| Buzzer 5V ou Sirene 12V | Emissor de som | 1 |
-| Módulo Relé | Acionamento da sirene | 1 |
-| Protoboard / Fenolite | Montagem | 1 |
-| Fonte 5V ou Bateria 18650 | Alimentação | 1 |
-| Módulo TP4056 + Step-Up | Recarga e elevação de tensão | 1 |
-| Fios, conectores, jumpers | Montagem elétrica | diversos |
+- ✅ Agendamento inteligente (aulas, recreios, eventos)
+- ✅ Ativação remota via interface web
+- ✅ Sincronização horária via NTP
+- ✅ Logs completos de operação
+- ✅ Fail-safes para evitar ativações indevidas
 
 ---
 
-## Progresso do Software
+## 🛠️ Tecnologias Utilizadas
 
-- [x] Esboço da idéia da aplicação
-- [x] Definição da linguagem e framework
-- [x] Criação do projeto
-- [x] Definir back-end
-- [x] Definir front-end
-- [x] Criação da database
-- [x] Receber informações do hardware e salvar na database
-- [x] Criação da pagina inicial
-- [x] Criar sistema de definição de horários e dias (salvar na database)
-- [x] Criar função de adicionar horários e dias para sirene tocar
-- [x] Criar função de remover horarios e dias para sirene tocar
-- [x] Criar função de ativar atraves de botao a sirene instantaneamente
-- [x] Mostrar na tela quais dias e horários estao definidos
-- [ ] Definir testes
-  
-## Progresso do Hardware
-- [x] Definir microcontrolador a ser utilizado
-- [ ] Adquirir materiais
-- [ ] Criar circuito
-- [ ] Incluir sistema OTA
-- [ ] Enviar dados/status da sirene para o servidor
-- [ ] Receber informações do servidor
-- [ ] Criar case
+| Componente | Tecnologias |
+|------------|-------------|
+| Backend    | Python 3.9+, Django 4.2, Django REST Framework, SQLite |
+| Firmware   | C++ (Arduino Core), ESP8266HTTPClient, NTPClient, ArduinoJson |
+| Frontend   | HTML5, Bootstrap 5, Chart.js (para gráficos de histórico) |
+| Infra      | Gunicorn (produção), Nginx (proxy reverso), Raspberry Pi (opcional) |
 
+```mermaid
+graph TD
+    %% ===== FRONTEND =====
+    FRONTEND["**Frontend**
+    - Django Admin
+    - index.html"]
+    
+    %% ===== BACKEND =====
+    VIEWS["**views.py**
+    - API REST
+    - data_receiver"]
+    MODELS["**models.py**
+    - Device
+    - AlarmSchedule"]
+    LOGIC["**views.py & forms.py**
+    - Motor de Regras"]
+    
+    %% ===== BANCO =====
+    DB[("**SQLite3**
+    - Device
+    - AlarmSchedule
+    - DeviceLog
+    - SensorData")]
+    
+    %% ===== HARDWARE =====
+    ESP["**ESP8266**
+    - WiFi Manager
+    - JSON Parser"]
+    SIRENE["**Sirene Física**
+    - Buzzer
+    - LOW or HIGH"]
+    
+    %% ===== FLUXO =====
+    FRONTEND -->|HTTP| VIEWS
+    VIEWS -->|ORM| MODELS
+    MODELS --> DB
+    VIEWS -->|HTTP JSON| ESP
+    ESP -->|GPIO| SIRENE
+    SIRENE -->|ESTADO| ESP
+    ESP -->|HTTP Logs| VIEWS
+    LOGIC --> VIEWS
+
+```
+
+---
+## Banco de Dados
+
+```mermaid
+erDiagram
+    %% ========== MODELOS PRINCIPAIS ==========
+    DEVICE {
+        string device_id PK
+        string device_name
+        datetime last_seen
+        string status
+    }
+
+    SENSOR {
+        int id PK
+        string name
+        string sensor_type
+        float value
+        datetime timestamp
+    }
+
+    SENSOR_DATA {
+        int id PK
+        float value
+        datetime timestamp
+    }
+
+    DEVICE_CONFIG {
+        int id PK
+        int send_interval
+        float temp_threshold
+    }
+
+    %% ========== CONTROLE DE SIRENE ==========
+    COMANDO_ESP {
+        int id PK
+        string comando
+        string source
+        boolean executado
+        datetime timestamp
+    }
+
+    SIREN_STATUS {
+        int id PK
+        boolean is_on
+        datetime last_activated
+    }
+
+    ALARM_SCHEDULE {
+        int id PK
+        boolean active
+        string event_type
+        time time
+        string days_of_week
+        date start_date
+        date end_date
+        datetime created_at
+        datetime updated_at
+    }
+
+    %% ========== CONFIGURAÇÕES E LOGS ==========
+    GLOBAL_CONFIG {
+        int id PK
+        string api_key
+        int data_refresh_interval
+    }
+
+    DEVICE_LOG {
+        int id PK
+        text log_message
+        datetime timestamp
+    }
+
+    %% ========== RELACIONAMENTOS CORRIGIDOS ==========
+    DEVICE ||--o{ SENSOR_DATA : "gera"
+    DEVICE ||--|| DEVICE_CONFIG : "possui"
+    DEVICE ||--o{ DEVICE_LOG : "registra"
+    SENSOR ||--o{ SENSOR_DATA : "contém"
+    ALARM_SCHEDULE ||--|{ COMANDO_ESP : "dispara"
+    COMANDO_ESP ||--|| SIREN_STATUS : "atualiza"
+
+
+```
+
+## 🏗️ Arquitetura do Sistema
+
+```mermaid
+graph TD
+    %% ========== ESTILOS ==========
+    classDef user fill:#ffffff,stroke:#2c3e50
+    classDef frontend fill:#eaf2f8,stroke:#2980b9
+    classDef backend fill:#e8f8f5,stroke:#27ae60
+    classDef device fill:#fdedec,stroke:#e74c3c
+    classDef data fill:#fff3cd,stroke:#f39c12
+
+    %% ========== PARTICIPANTES ==========
+    USUARIO[["Usuário"]]:::user
+    FRONTEND[["Interface Web<br/>(Django)"]]:::frontend
+    BACKEND[["Servidor Django<br/>(manage.py)"]]:::backend
+    ESP8266[["Microcontrolador<br/>(ESP8266)"]]:::device
+    SIREINE[["Sirene"]]:::device
+
+    %% ========== DADOS ==========
+    JSON_AGENDA[["JSON de Agenda"]]:::data
+    DB[["Banco de Dados<br/>(SQLite3)"]]:::data
+
+    %% ========== FLUXO COMPLETO ==========
+    USUARIO -->|Configura agenda| FRONTEND
+    FRONTEND -->|Salva configuração| DB
+    BACKEND -->|Gera JSON| JSON_AGENDA
+    BACKEND -->|Envia via API REST| ESP8266
+    ESP8266 -->|Interpreta JSON| JSON_AGENDA
+    JSON_AGENDA -->|Verifica horário| ESP8266
+    ESP8266 -->|Ativa/Desativa| SIREINE
+    SIREINE -->|Feedback| ESP8266
+    ESP8266 -->|Log de estado| BACKEND
+    BACKEND -->|Atualiza status| DB
+
+    %% ========== ESTILOS DE LINHA ==========
+    linkStyle 3 stroke:#9b59b6,stroke-width:2px,stroke-dasharray:5
+    linkStyle 6 stroke:#e74c3c,stroke-width:2px
+
+
+```
+---
+
+## 📥 Instalação
+
+### Pré-requisitos
+
+- Python 3.9+
+- Arduino IDE (para firmware)
+- ESP8266 com WiFi
+
+### Backend (Django)
+
+```bash
+git clone [repo_url]
+cd sirene-escolar
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver 0.0.0.0:8000
+```
+
+### Firmware (ESP8266)
+
+1. Instale as bibliotecas no Arduino IDE:
+   - ESP8266HTTPClient
+   - NTPClient
+   - ArduinoJson
+
+2. Carregue `ESP8266_Code.cpp`
+
+3. Configure `settings.h` com suas credenciais WiFi
 
 ---
 
-## 👨‍🔬 Desenvolvido por
+## ⚙️ Configuração
 
-**Disciplina de Projeto Integrador II — Engenharia da Computação UFSM**
+### Arquivo `settings.py` (Django)
 
-Equipe de Software:
-- Eduardo Schlesner
-- Leonardo Moscheta
-- Higor Brum
-- Vinicios Ramos
+```python
+# Configurações críticas
+ALLOWED_HOSTS = ['*']  # Restrinja em produção!
+TIME_ZONE = 'America/Sao_Paulo'
+```
 
-Equipe de Hardware:
-- Matheus Miranda
-- Gabriela Bernardoni
-- Maria Eduarda Haidar
+### Hardware
 
-Equipe de Integração:
-- Luize Baldoni
-
----
-
-## 📄 Licença
-
-
+| Componente | Pino ESP8266 | Observações |
+|------------|--------------|-------------|
+| Sirene     | GPIO5 (D1)   | Relay ou transistor |
+| LED Status | GPIO2 (D4)   | LED interno (invertido) |
 
 ---
 
-## 📬 Contato
+## 🚀 Como Usar
 
+### 1. Agendamentos
+
+Acesse `http://localhost:8000/admin` e:
+
+- Crie um novo `AlarmSchedule`
+- Defina:
+  - Tipo de evento (Aula, Recreio, etc.)
+  - Horário e dias da semana
+  - Período de validade
+
+### 2. Ativação Manual
+
+```bash
+curl -X POST http://localhost:8000/ativar/   -H "Content-Type: application/json"   -d '{}'
+```
+
+### 3. Monitoramento
+
+- **Serial Monitor**: Logs do ESP (115200 baud)
+- **Admin Django**: Histórico em `DeviceLog`
 
 ---
 
+## 📡 Documentação da API
+
+| Endpoint           | Método | Parâmetros               | Resposta                |
+|--------------------|--------|--------------------------|-------------------------|
+| `/api/comando`     | GET    | -                        | JSON com agendamentos   |
+| `/check_command/`  | GET    | -                        | `{"command": "ligar"}`  |
+| `/confirm_command/`| POST   | `{"status": "success"}`  | -                       |
+| `/api/sensor_data` | POST   | `{"value": 25.5, "type": "temp"}` | Log no banco de dados |
+
+---
+
+## 🔒 Segurança
+
+### Medidas Atuais
+
+- Timeout automático de 3s na sirene
+- Verificação de duplicidade de comandos
+
+### Recomendações para Produção
+
+- Implementar HTTPS
+- Adicionar autenticação JWT
+- Restringir `ALLOWED_HOSTS`
+- Usar PostgreSQL com criptografia
+
+---
+
+## 🐛 Troubleshooting
+
+| Problema                 | Solução                        |
+|--------------------------|--------------------------------|
+| ESP não conecta ao WiFi  | Verificar credenciais e sinal  |
+| Horário incorreto        | Checar servidor NTP e fuso horário |
+| Sirene não desliga       | Testar circuito de potência/relay |
+| API retorna 403          | Checar CSRF tokens ou CORS    |
+
+---
+
+## 🛣️ Roadmap e Ideias para Melhorias Futuras
+
+- App móvel para notificações
+- Integração com calendário acadêmico
+- Dashboard com métricas em tempo real
+- Suporte a múltiplas sirenes
+
+---
+
+## 📜 Licença
+
+MIT License - Consulte o arquivo LICENSE para detalhes.
+
+Documentação completa disponível em `/docs/`.

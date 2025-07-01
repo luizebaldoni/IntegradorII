@@ -1,0 +1,43 @@
+graph TD
+    %% ========== ESTILOS ACADÊMICOS ==========
+    classDef entity fill:#ffffff,stroke:#2c3e50,stroke-width:2px
+    classDef process fill:#eaf2f8,stroke:#2980b9,stroke-dasharray:5
+    classDef datastore fill:#e8f8f5,stroke:#27ae60
+    classDef flow fill:#fdedec,stroke:#e74c3c,dashed
+
+    %% ========== ENTIDADES PRINCIPAIS ==========
+    USER[["Usuário<br/>(auth_user)"]]:::entity
+    DEVICE[["Dispositivo IoT<br/>(app_device)"]]:::entity
+    SENSOR[["Sensor<br/>(app_sensor)"]]:::datastore
+    SIREN[["Estado da Sirene<br/>(app_sirenstatus)"]]:::datastore
+
+    %% ========== PROCESSOS ==========
+    AUTH{{"Autenticação<br/>e Autorização"}}:::process
+    DATA_INGESTION{{"Ingestão de Dados<br/>(views.py)"}}:::process
+    RULES_ENGINE{{"Motor de Regras<br/>(alarms.py)"}}:::process
+
+    %% ========== ARMAZENAMENTO ==========
+    DB[("Banco de Dados<br/>PostgreSQL")]:::datastore
+    LOGS[["Logs do Sistema<br/>(app_devicelog)"]]:::datastore
+
+    %% ========== FLUXO DO SISTEMA ==========
+    USER -->|1. Configura| DEVICE
+    DEVICE -->|2. Monitora| SENSOR
+    SENSOR -->|3. Dados| DATA_INGESTION
+    DATA_INGESTION -->|4. Persiste| DB
+    DATA_INGESTION -->|5. Avalia| RULES_ENGINE
+    RULES_ENGINE -->|6. Ativa/Desativa| SIREN
+    SIREN -->|7. Notifica| USER
+    RULES_ENGINE -->|8. Registra| LOGS
+
+    %% ========== LEGENDA ==========
+    subgraph Legend
+        direction TB
+        E[Entidade]:::entity
+        P[Processo]:::process
+        D[Armazenamento]:::datastore
+        F[Fluxo]:::flow
+    end
+
+    %% ========== ESTILOS DE LINHA ==========
+    linkStyle 0,1,2,3,4,5,6,7 stroke:#7f8c8d,stroke-width:2px
