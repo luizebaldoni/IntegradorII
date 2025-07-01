@@ -123,7 +123,8 @@ STATICFILES_DIRS = [
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    '192.168.1.40',  # ← Seu IP local (acessado pelo ESP)
+    '192.168.1.5',  # ← Seu IP local (acessado pelo ESP)
+    '192.168.1.2',
 ]
 
 ESP_BELL_URL = "http://192.168.1.14/ring"  # Substitua pelo IP real da sua ESP

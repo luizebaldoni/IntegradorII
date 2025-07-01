@@ -22,9 +22,9 @@ from .views import (
 	AlarmUpdateView,
 	AlarmDeleteView,
 	comando_esp,
-	ativar_campainha, check_command, confirm_command
+	ativar_campainha, check_command, confirm_command, update_alarm, isUpdate
 	)
-
+app_name = 'app'
 urlpatterns = [
 		# Páginas web
 		path('', HomeView.as_view(), name = 'home'),
@@ -38,4 +38,6 @@ urlpatterns = [
 		path('ativar/', ativar_campainha, name = 'ativar-campainha'),
 		path('check_command/', check_command, name='check_command'),
 		path('confirm_command/', confirm_command, name='confirm_command'),
+		path('update/', update_alarm, name = 'update'),
+		path('isUpdate/', isUpdate, name='isUpdate'),
 		]

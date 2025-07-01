@@ -39,7 +39,7 @@ class SirenStatusAdmin(admin.ModelAdmin):
 
 class ComandoESPAdmin(admin.ModelAdmin):
     """Configuração do admin para comandos"""
-    list_display = ('comando', 'executado', 'timestamp')
+    list_display = ('comando', 'executado', 'timestamp', 'update',)
     readonly_fields = ('timestamp',)
     list_filter = ('executado', 'timestamp')
     date_hierarchy = 'timestamp'

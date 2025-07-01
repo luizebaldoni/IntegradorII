@@ -142,6 +142,28 @@ def confirm_command(request):
         return JsonResponse({'status': 'success'})
     return JsonResponse({'status': 'error'}, status=400)
 
+@csrf_exempt
+def update_alarm(request):
+    if request.method == 'POST':
+        comando = ComandoESP.objects.first()
+        if comando:
+            comando.update = 'modoUpdate'  # Atualiza o campo com a hora atual
+            comando.save()
+            return JsonResponse({'status': 'success'})
+        return JsonResponse({'status': 'not found'}, status=404)
+    return JsonResponse({'status': 'error'}, status=405)
+
+def isUpdate(request):
+    if request.method == 'GET':
+        comando = ComandoESP.objects.first()
+        if comando:
+            return JsonResponse({
+                'update': comando.update
+            })
+        else:
+            return JsonResponse({'error': 'Nenhum comando encontrado'}, status=404)
+    return JsonResponse({'error': 'Método não permitido'}, status=405)
+
 class HomeView(APIView):
 	def get(self, request):
 		# Converter dia atual para formato do sistema (ex: "DOM")
@@ -179,7 +201,7 @@ class HomeView(APIView):
 				'alarms': alarms,
 				'titulo': 'Sistema de Sirene Escolar'
 				})
-	
+
 class AlarmListView(ListView):
 	"""Lista todos os agendamentos"""
 	model = AlarmSchedule

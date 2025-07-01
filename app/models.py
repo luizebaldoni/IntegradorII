@@ -96,6 +96,7 @@ class ComandoESP(models.Model):
     executado = models.BooleanField(default=False)
     timestamp = models.DateTimeField(auto_now_add=True)
     duration = models.IntegerField(default=60, verbose_name='Duração (minutos)')
+    update = models.CharField(max_length=20, default='normal')
 
     def __str__(self):
         return f"Comando: {self.comando} (Fonte: {self.source})"
