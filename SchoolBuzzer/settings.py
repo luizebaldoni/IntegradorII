@@ -127,7 +127,7 @@ ALLOWED_HOSTS = [
     '192.168.1.2',
 ]
 
-ESP_BELL_URL = "http://192.168.1.14/ring"  # Substitua pelo IP real da sua ESP
+ESP_BELL_URL = "http://192.168.1.2/ring"  # Substitua pelo IP real da sua ESP
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

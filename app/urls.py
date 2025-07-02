@@ -22,7 +22,7 @@ from .views import (
 	AlarmUpdateView,
 	AlarmDeleteView,
 	comando_esp,
-	ativar_campainha, check_command, confirm_command, update_alarm, isUpdate
+	ativar_campainha, check_command, confirm_command, update_alarm, isUpdate, updateConfirm
 	)
 app_name = 'app'
 urlpatterns = [
@@ -40,4 +40,5 @@ urlpatterns = [
 		path('confirm_command/', confirm_command, name='confirm_command'),
 		path('update/', update_alarm, name = 'update'),
 		path('isUpdate/', isUpdate, name='isUpdate'),
+		path('updateConfirm/', updateConfirm, name = 'updateConfirm'),
 		]

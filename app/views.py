@@ -89,7 +89,7 @@ def ativar_campainha(request):
 	if request.method == 'POST':
 		try:
 			data = json.loads(request.body)
-			duration = data.get('duration', 60)  # Default 60 segundos
+			duration = data.get('duration', 3)  # Default 3 segundos
 			
 			# Cria/Atualiza o comando
 			comando = ComandoESP.objects.update_or_create(
@@ -157,12 +157,22 @@ def isUpdate(request):
     if request.method == 'GET':
         comando = ComandoESP.objects.first()
         if comando:
-            return JsonResponse({
-                'update': comando.update
-            })
+            return JsonResponse({'update': comando.update})
         else:
             return JsonResponse({'error': 'Nenhum comando encontrado'}, status=404)
     return JsonResponse({'error': 'Método não permitido'}, status=405)
+
+@csrf_exempt
+def updateConfirm(request):
+	if request.method == 'POST':
+		comando = ComandoESP.objects.first()
+		if comando:
+			comando.update = 'modoNormal'
+			comando.save()
+			return JsonResponse({'status': 'success'})
+		else:
+			return JsonResponse({'error': 'Nenhum comando encontrado'}, status=404)
+	return JsonResponse({'error': 'Método não permitido'}, status=405)
 
 class HomeView(APIView):
 	def get(self, request):
