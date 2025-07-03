@@ -1,125 +1,218 @@
-/***********************************************
- * Descrição:
- *  Este script implementa a lógica para envio de uma requisição POST
- *  ao servidor com a finalidade de ativar uma sirene remotamente
- *  por meio da interface web. Inclui feedback visual, notificações e
- *  controle de estado do botão.
- ************************************************/
+function ativarSirene() {
+    fetch('/ativar/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            duration: 30,
+            source: 'web_interface'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Sucesso:', data);
+        alert('Sirene ativada com sucesso!');
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro ao ativar sirene');
+    });
+}
 
-/**
- * Ativa a sirene via requisição POST para a rota Django definida.
- * Fornece feedback visual ao usuário (spinner, botão desabilitado e texto).
- */
+// Estrutura para armazenar os horários
+let horarios = {};
+ // Função para carregar os agendamentos via API
+    async function carregarAgendamentos() {
+        try {
+            const response = await fetch('');  // Endereço do endpoint da view HomeView
+            const data = await response.json();
 
-async function ativarSirene() {
-  const btn = document.getElementById('sirenButton');
+            const horariosContainer = document.getElementById('horarios-container');
+            const horariosList = document.createElement('ul');
+            horariosContainer.appendChild(horariosList);
+
+            data.alarms.forEach(alarm => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `<strong>${alarm.event_type}</strong>: ${alarm.time} (${alarm.start_date} → ${alarm.end_date})`;
+                horariosList.appendChild(listItem);
+            });
+        } catch (error) {
+            console.error('Erro ao carregar os agendamentos:', error);
+        }
+    }
+
+    // Chama a função para carregar os agendamentos quando a página for carregada
+    document.addEventListener('DOMContentLoaded', carregarAgendamentos);
+// Carregar horários salvos
+function carregarHorarios() {
+    const horariosSalvos = localStorage.getItem('horariosEscola');
+    if (horariosSalvos) {
+        horarios = JSON.parse(horariosSalvos);
+    }
+    atualizarInterface();
+}
+function triggerSiren() {
   const btnText = document.getElementById('sirenButtonText');
   const spinner = document.getElementById('sirenSpinner');
 
-  // Inicia estado de carregamento
-  btn.disabled = true;
   btnText.textContent = "Enviando...";
   spinner.classList.remove('d-none');
 
-  try {
-    const response = await fetch("{% url 'app:ativar-campainha' %}", {
-      method: 'POST',
-      headers: {
-        'X-CSRFToken': '{{ csrf_token }}',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        duration: 5,             // Duração da sirene em segundos
-        source: 'web_interface'   // Fonte de acionamento
-      })
-    });
-
-    if (!response.ok) throw new Error('Erro na resposta do servidor');
-
-    const data = await response.json();
-
-    // Feedback de sucesso
-    mostrarNotificacao('Sirene ativada com sucesso!', 'sucesso');
+  fetch("{% url 'app:ativar-campainha' %}", {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': '{{ csrf_token }}',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({source: 'manual'})
+  })
+  .then(response => response.json())
+  .then(data => {
     btnText.textContent = "Sirene acionada!";
-
-    // Reset do botão após 3 segundos
     setTimeout(() => {
       btnText.textContent = "Tocar Sirene";
       spinner.classList.add('d-none');
-      btn.disabled = false;
     }, 3000);
-  } catch (error) {
-    console.error('Erro:', error);
-
-    // Feedback de erro
+  })
+  .catch(error => {
     btnText.textContent = "Erro! Tentar novamente";
     spinner.classList.add('d-none');
-    btn.disabled = false;
-    mostrarNotificacao('Erro ao ativar sirene', 'erro');
-  }
-}
-
-/**
- * Exibe uma notificação visual no canto inferior com fade temporizado.
- * @param {string} mensagem - Texto da notificação.
- * @param {string} tipo - 'sucesso' ou 'erro', define o ícone e estilo.
- */
-function mostrarNotificacao(mensagem, tipo) {
-  const notificacao = document.createElement('div');
-  notificacao.classList.add('notificacao', tipo);
-
-  // Ícone condicional baseado no tipo
-  const icon = tipo === 'sucesso' ? '✓' : '✕';
-  notificacao.innerHTML = `<span class="notificacao-icon">${icon}</span> ${mensagem}`;
-
-  document.body.appendChild(notificacao);
-
-  // Animação de entrada
-  setTimeout(() => {
-    notificacao.classList.add('show');
-  }, 10);
-
-  // Remoção automática com fade após 3 segundos
-  setTimeout(() => {
-    notificacao.classList.remove('show');
-    setTimeout(() => {
-      notificacao.remove();
-    }, 300);
-  }, 3000);
-}
-
-/**
- * Inicializa ícones Feather e tooltips Bootstrap após o carregamento do DOM.
- */
-document.addEventListener('DOMContentLoaded', function() {
-  feather.replace(); // Substitui ícones <i> com SVGs do Feather
-
-  // Inicializa tooltips com Bootstrap 5
-  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-  tooltipTriggerList.map(function (tooltipTriggerEl) {
-    return new bootstrap.Tooltip(tooltipTriggerEl);
   });
-});
-// Ativar item do menu correspondente à página atual
-document.addEventListener('DOMContentLoaded', function() {
-    const currentPath = window.location.pathname;
-    document.querySelectorAll('.sidebar__link').forEach(link => {
-        if (link.getAttribute('href') === currentPath) {
-            link.classList.add('active');
-        }
-    });
-});
+}
 
-function confirmarExclusao(url) {
-    if (confirm('Tem certeza que deseja excluir este agendamento?')) {
-        window.location.href = url;
+// Salvar horários no localStorage
+function salvarHorarios() {
+    localStorage.setItem('horariosEscola', JSON.stringify(horarios));
+}
+
+// Adicionar novo horário
+function adicionarHorario() {
+    const dia = document.getElementById('dia').value;
+    const horario = document.getElementById('horario').value;
+    const descricao = document.getElementById('descricao').value;
+
+    if (!horario || !descricao) {
+        mostrarNotificacao('Por favor, preencha todos os campos!', 'erro');
+        return;
+    }
+
+    // Validar o formato do horário
+    if (!validarHorario(horario)) {
+        mostrarNotificacao('Horário inválido! Use o formato HH:mm.', 'erro');
+        return;
+    }
+
+    // Inicializar array do dia se não existir
+    if (!horarios[dia]) {
+        horarios[dia] = [];
+    }
+
+    // Verificar se já existe esse horário no dia
+    const jaExiste = horarios[dia].some(h => h.horario === horario);
+    if (jaExiste) {
+        mostrarNotificacao('Já existe um horário cadastrado para esse mesmo horário!', 'erro');
+        return;
+    }
+
+    // Adicionar novo horário
+    horarios[dia].push({
+        horario: horario,
+        descricao: descricao
+    });
+
+    // Ordenar horários por ordem crescente
+    horarios[dia].sort((a, b) => a.horario.localeCompare(b.horario));
+
+    salvarHorarios();
+    atualizarInterface();
+    mostrarNotificacao('Horário adicionado com sucesso!', 'sucesso');
+
+    // Limpar formulário
+    document.getElementById('horario').value = '';
+    document.getElementById('descricao').value = '';
+}
+
+// Remover horário
+function removerHorario(dia, index) {
+    if (confirm('Tem certeza que deseja remover este horário?')) {
+        horarios[dia].splice(index, 1);
+        if (horarios[dia].length === 0) {
+            delete horarios[dia];
+        }
+        salvarHorarios();
+        atualizarInterface();
     }
 }
 
-// Atualizar os links de exclusão para usar esta função
-document.querySelectorAll('.btn-excluir').forEach(btn => {
-    btn.addEventListener('click', function(e) {
-        e.preventDefault();
-        confirmarExclusao(this.href);
+// Atualizar a interface com os horários salvos
+function atualizarInterface() {
+    const container = document.getElementById('horarios-container');
+    container.innerHTML = '';
+
+    const diasSemana = ['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado', 'domingo'];
+    const nomesDias = { // "Traduz" os nomes curtos para os completos
+        'segunda': 'Segunda-feira',
+        'terca': 'Terça-feira',
+        'quarta': 'Quarta-feira',
+        'quinta': 'Quinta-feira',
+        'sexta': 'Sexta-feira',
+        'sabado': 'Sábado',
+        'domingo': 'Domingo'
+    };
+
+    diasSemana.forEach(dia => { // Para cada dia da semana, criar um card
+        const diaCard = document.createElement('div');
+        diaCard.className = 'dia-card';
+
+        let horariosHtml = '';
+        if (horarios[dia] && horarios[dia].length > 0) {
+            // Se tiver horarios para o dia, mostra o horário, descrição e botão de remover
+            horarios[dia].forEach((horario, index) => {
+                horariosHtml += `
+                    <div class="horario-item">
+                        <div>
+                            <div class="horario-time">${horario.horario}</div>
+                            <div class="horario-desc">${horario.descricao}</div>
+                        </div>
+                        <button class="delete-btn" onclick="removerHorario('${dia}', ${index})">✕</button>
+                    </div>
+                `;
+            });
+        } else {
+            // Se não tiver horários para o dia, mostra mensagem de "nenhum horário cadastrado"
+            horariosHtml = '<p style="color: #7f8c8d; font-style: italic;">Nenhum horário cadastrado</p>';
+        }
+
+        // Montando o card e adicionando ao HTML
+        diaCard.innerHTML = `
+            <h3>${nomesDias[dia]}</h3>
+            ${horariosHtml}
+        `;
+        container.appendChild(diaCard);
     });
+}
+
+// Função para mostrar notificações de sucesso ou erro
+function mostrarNotificacao(mensagem, tipo) {
+    const notificacao = document.createElement('div');
+    notificacao.classList.add('notificacao', tipo);
+    notificacao.textContent = mensagem;
+    document.body.appendChild(notificacao);
+
+    setTimeout(() => {
+        notificacao.remove();
+    }, 3000); // Remove a notificação após 3 segundos
+}
+
+// Função para validar o formato do horário (HH:mm)
+function validarHorario(horario) {
+    const regex = /^([01]?[0-9]|2[0-3]):([0-5][0-9])$/;
+    return regex.test(horario);
+}
+
+// Inicializar o sistema
+document.addEventListener('DOMContentLoaded', function() {
+    carregarHorarios(); // Carrega os horários salvos ao carregar a página
 });

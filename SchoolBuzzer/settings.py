@@ -27,11 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent  # Diretório base do projeto
 SECRET_KEY = 'django-insecure-d@&jygktz+i@rt$022uw_$(+11wr8#tsnsjo9%#d5j23i4$qdj'
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    '192.168.1.40',  # ← IP local da máquina para acesso via ESP
-]
+ALLOWED_HOSTS = ['*']
 
 # ========================================================
 # APLICAÇÕES INSTALADAS
