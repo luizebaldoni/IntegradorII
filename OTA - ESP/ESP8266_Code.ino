@@ -50,22 +50,23 @@
 #include <ArduinoJson.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
+#include <ArduinoOTA.h>
 
 ///// CONFIGURAÇÕES DE REDE /////
 const char* ssid = "Hidrogenio_2.4";        // SSID da rede Wi-Fi à qual o ESP8266 se conectará
 const char* password = "ceespsol";           // Senha da rede Wi-Fi
 
 // Endpoints do servidor Django
-const char* scheduleUrl = "http://192.168.1.40:8000/api/comando"; // URL para verificar agendamentos
-const char* commandUrl = "http://192.168.1.40:8000/check_command/"; // URL para comandos manuais
-const char* confirmUrl = "http://192.168.1.40:8000/confirm_command/"; // URL para confirmar comando
+const char* scheduleUrl = "http://192.168.1.25:8000/api/comando"; // URL para verificar agendamentos
+const char* commandUrl = "http://192.168.1.25:8000/check_command/"; // URL para comandos manuais
+const char* confirmUrl = "http://192.168.1.25:8000/confirm_command/"; // URL para confirmar comando
 
 // Configurações de hardware
 const int sirenPin = 5;           // Pino de controle da sirene (saída digital, D1 no ESP8266)
 const int statusLed = 2;          // LED interno (azul, D4 no ESP8266)
 
 ///// INTERVALOS DE VERIFICAÇÃO /////
-const unsigned long scheduleCheckInterval = 100000;  // Intervalo de 1 minuto para verificar agendamentos
+const unsigned long scheduleCheckInterval = 60000;  // Intervalo de 1 minuto para verificar agendamentos
 const unsigned long commandCheckInterval = 5000;    // Intervalo de 5 segundos para verificar comandos manuais
 const unsigned long sirenMinDuration = 2000;        // Duração mínima da sirene (2 segundos)
 const unsigned long sirenMaxDuration = 5000;       // Duração máxima da sirene (5 segundos)
@@ -85,20 +86,24 @@ const char* DAYS_OF_WEEK[7] = {"DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"};
 
 ///// FUNÇÃO DE INICIALIZAÇÃO /////
 void setup() {
+  ArduinoOTA.setPassword("123qet");              // Setar a senha da OTA
   Serial.begin(115200);                          // Inicializa a comunicação serial com a taxa de 115200 bps
   Serial.println("\nIniciando sistema de sirene escolar...");
 
   // Configuração dos pinos
   pinMode(sirenPin, OUTPUT);                     // Configura o pino da sirene como saída digital
   pinMode(statusLed, OUTPUT);                    // Configura o pino do LED interno como saída digital
-  digitalWrite(sirenPin, LOW);                   // Inicializa a sirene desligada
-  digitalWrite(statusLed, LOW);                  // LED interno desligado (ativo baixo)
+  digitalWrite(sirenPin, HIGH);                   // Inicializa a sirene desligada
+  digitalWrite(statusLed, HIGH);                  // LED interno desligado (ativo baixo)
 
   // Conectar ao WiFi
   connectWiFi();
 
   // Configurar NTP (Network Time Protocol)
   setupNTP();
+
+  // Configurar OTA (Over The Air)
+  setupOTA();
 
   Serial.println("Sistema pronto");
 }
@@ -107,6 +112,9 @@ void setup() {
 void loop() {
   // Atualiza o cliente NTP
   timeClient.update();
+
+  // Utiliza o OTA
+  ArduinoOTA.handle();
 
   // Verifica conexão com WiFi
   if (WiFi.status() != WL_CONNECTED) {
@@ -329,6 +337,34 @@ void deactivateSiren(String reason) {
   // Retorna ao estado normal do LED
   digitalWrite(statusLed, LOW);
 }
+
+////// FUNÇÃO DE SETUP DA OTA /////////
+void setupOTA() {
+  ArduinoOTA.onStart([]() {
+    Serial.println("Início da atualização OTA");
+  });
+
+  ArduinoOTA.onEnd([]() {
+    Serial.println("\nAtualização OTA concluída!");
+  });
+
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+    Serial.printf("Progresso: %u%%\r", (progress * 100) / total);
+  });
+
+  ArduinoOTA.onError([](ota_error_t error) {
+    Serial.printf("Erro OTA [%u]: ", error);
+    if (error == OTA_AUTH_ERROR) Serial.println("Autenticação falhou");
+    else if (error == OTA_BEGIN_ERROR) Serial.println("Falha ao iniciar");
+    else if (error == OTA_CONNECT_ERROR) Serial.println("Falha na conexão");
+    else if (error == OTA_RECEIVE_ERROR) Serial.println("Falha na recepção");
+    else if (error == OTA_END_ERROR) Serial.println("Falha ao finalizar");
+  });
+
+  ArduinoOTA.begin();
+  Serial.println("OTA pronto!");
+}
+
 
 ///// FUNÇÕES AUXILIAR DE DEBUG /////
 
