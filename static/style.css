@@ -279,14 +279,14 @@ body {
 /*         Menu Lateral         */
 /* ============================= */
 
-/** .sidebar: Menu vertical fixo com estilo clean. */
+/** .sidebar: Menu vertical fixo com fundo branco e sombra. */
 .sidebar {
     position: fixed;
     top: 20px;
     left: 20px;
-    background: #3498db;
+    background: white;
     border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     padding: 10px 0;
     width: 60px;
     height: calc(100vh - 40px);
@@ -294,66 +294,69 @@ body {
     transition: all 0.3s ease;
 }
 
-/** .sidebar__menu: Lista de itens do menu. */
+/** .sidebar__menu: Lista de itens do menu sem estilos de lista. */
 .sidebar__menu {
-    color: black;
     list-style: none;
     padding: 0;
     margin: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
-/** .sidebar__item: Item do menu com margem vertical. */
+/** .sidebar__item: Item do menu centralizado verticalmente. */
 .sidebar__item {
-    color: white;
-    margin: 10px 0;
-    position: relative;
-}
-.sidebar__link i {
-    color: #a0a0a0; /* cor padrão */
-    transition: color 0.3s ease;
-}
-
-.sidebar__link.active i {
-    color: #3498db; /* cor quando ativo */
-}
-/* Estilo para ícones Feather */
-[data-feather] {
-    color: #ffffff; /* Cor branca para os ícones */
-    stroke: currentColor; /* Faz o SVG usar a cor do texto */
-    width: 1.2em;
-    height: 1.2em;
-    vertical-align: middle;
-}
-
-/* Estilo para ícones quando o item está ativo */
-.sidebar__link.active [data-feather] {
-    color: #3498db;
-    stroke: currentColor;
-}
-/** .sidebar__link: Link de ícone centralizado. */
-.sidebar__link {
     display: flex;
     justify-content: center;
-    align-items: center;
-    position: relative;
-    height: 50px;
-    color: black;
-    text-decoration: none;
-    transition: all 0.3s ease;
-}
-/** .sidebar__link i: Ícone com traçado escuro. */
-.sidebar__link i {
-    color: black;
-    stroke-width: 2px;
-    width: 24px;
-    height: 24px;
-    transition: stroke 0.3s ease;
+    margin: 5px 0;
 }
 
-/** .sidebar__link span: Tooltip lateral flutuante. */
+/** .sidebar__link: Link do menu com flexbox e transição suave. */
+.sidebar__link {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 60px;
+    color: #2c3e50;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+    border-radius: 8px;
+    width: 100%;
+}
+
+/** .sidebar__link:hover: Efeito hover com fundo azul claro. */
+.sidebar__link:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+}
+
+/** .sidebar__link.active: Estado ativo com borda roxa e fundo claro. */
+.sidebar__link.active {
+    background-color: rgba(142, 68, 173, 0.1);
+    border-left: 3px solid #8e44ad;
+}
+
+/** [data-feather]: Estilo base para ícones Feather. */
+[data-feather] {
+    color: #3498db;
+    stroke: currentColor;
+    fill: none;
+    width: 1.5em;
+    height: 1.5em;
+    stroke-width: 2;
+    transition: all 0.3s ease;
+}
+
+/** .sidebar__link.active [data-feather]: Ícone roxo quando ativo. */
+.sidebar__link.active [data-feather] {
+    color: #8e44ad;
+}
+
+/** .sidebar__link span: Tooltip lateral escondido por padrão. */
 .sidebar__link span {
     position: absolute;
-    left: 60px;
+    left: 70px;
     white-space: nowrap;
     background: white;
     padding: 8px 12px;
@@ -364,8 +367,9 @@ body {
     transform: translateX(-10px);
     transition: all 0.3s ease;
     font-size: 14px;
-    color: #3498db;
-    font-weight: bold;
+    color: #2c3e50;
+    font-weight: 500;
+    z-index: 1001;
 }
 
 /** .sidebar__link:hover span: Exibe tooltip ao passar o mouse. */
@@ -374,15 +378,12 @@ body {
     transform: translateX(0);
 }
 
-.sidebar__link.active {
-    background-color: rgba(52, 152, 219, 0.1);
-    border-left: 3px solid #3498db;
-}
 
-.sidebar__link.active i {
-    stroke: #3498db;
-}
-/* Estilos para cards */
+/* ============================= */
+/*        Estilos para Cards     */
+/* ============================= */
+
+/** .card: Card sem borda com sombra suave. */
 .card {
     border: none;
     border-radius: 10px;
@@ -390,22 +391,33 @@ body {
     margin-bottom: 20px;
 }
 
+/** .card-body: Espaçamento interno do card. */
 .card-body {
     padding: 30px;
 }
 
-/* Melhorias nos botões */
+
+/* ============================= */
+/*        Botões Grandes         */
+/* ============================= */
+
+/** .btn-lg: Botão com tamanho aumentado. */
 .btn-lg {
     padding: 10px 20px;
     font-size: 1.1rem;
 }
 
-/* Espaçamento entre ícones e texto */
+/** .btn i: Espaçamento entre ícones e texto em botões. */
 .btn i {
     margin-right: 8px;
 }
 
-/* Estilo para alertas personalizados */
+
+/* ============================= */
+/*        Alertas Personalizados */
+/* ============================= */
+
+/** .alert-secondary: Alerta com borda lateral e fundo claro. */
 .alert-secondary {
     background-color: #f8f9fa;
     border-left: 4px solid #6c757d;
@@ -413,8 +425,14 @@ body {
     margin: 20px 0;
 }
 
-/* Responsividade para tabelas */
+
+/* ============================= */
+/*        Responsividade         */
+/* ============================= */
+
+/** @media (max-width: 768px): Ajustes para mobile. */
 @media (max-width: 768px) {
+    /** .table-responsive: Adaptação de tabelas para mobile. */
     .table-responsive {
         border: 0;
     }
@@ -455,6 +473,7 @@ body {
         font-weight: bold;
     }
 
+    /** .btn-group: Alinhamento de grupos de botões. */
     .btn-group {
         display: flex;
         justify-content: flex-end;

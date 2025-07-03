@@ -13,19 +13,18 @@ ENDPOINTS PRINCIPAIS:
 - /agendamentos/: CRUD de agendamentos
 """
 
-<<<<<<< HEAD
+
 # ========================================================
 # IMPORTAÇÕES
 # ========================================================
 
-=======
 import json
 from datetime import datetime, time
 from django.utils import timezone
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.http import JsonResponse
->>>>>>> a9c4da094403806d7c7b19779d640bc94baab40d
+
 from django.contrib import messages
 from django.http import JsonResponse
 from django.shortcuts import render
