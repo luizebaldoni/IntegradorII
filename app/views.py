@@ -17,16 +17,13 @@ ENDPOINTS PRINCIPAIS:
 # IMPORTAÇÕES
 # ========================================================
 
-import json
-from datetime import datetime, time
-from django.utils import timezone
-from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
-from django.http import JsonResponse
 from django.contrib import messages
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from rest_framework.views import APIView
 
 from .forms import AlarmForm

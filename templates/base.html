@@ -4,8 +4,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="icon" href="{% static 'images/favicon.ico' %}">
+    <style>
+        .sidebar__link.active {
+            background-color: rgba(52, 152, 219, 0.1);
+            border-left: 3px solid #3498db;
+        }
 
+        .sidebar__link.active i {
+            color: #3498db;
+        }
+    </style>
+    <nav class="sidebar">
+        <ul class="sidebar__menu">
+            <li class="sidebar__item">
+                <a href="{% url 'app:home' %}" class="sidebar__link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                    <i data-feather="home"></i><span>Início</span>
+                </a>
+            </li>
+            <li class="sidebar__item">
+                <a href="{% url 'app:alarm-list' %}" class="sidebar__link {% if 'alarm' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="icone" data-feather="message-square"></i><span>Agendamentos</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
 
   <title>{% block title %}Campainha{% endblock %}</title>
 
@@ -20,13 +44,19 @@
   <link rel="stylesheet" href="{% static 'style.css' %}">
 </head>
 <body>
-  <!-- HEADER IDÊNTICO AO index.html -->
+  <!-- HEADER -->
   <header>
-    <h1>Sistema da Campainha</h1>
-    <nav>
-      <a href="{% url 'app:home' %}">Início</a>
-      <a href="{% url 'app:alarm-list' %}">Agendamentos</a>
-    </nav>
+    <nav class="sidebar">
+  <ul class="sidebar__menu">
+    <li class="sidebar__item"><a href="{% url 'app:home' %}" class="sidebar__link"><i data-feather="home"></i><span>Início</span></a></li>
+    <li class="sidebar__item"><a href="{% url 'app:alarm-list' %}" class="sidebar__link"><i data-feather="message-square"></i><span>Agendamentos</span></a></li>
+    <li class="sidebar__item"><a href="#" class="sidebar__link"><i data-feather="users"></i><span>Projeto</span></a></li>
+    <li class="sidebar__item"><a href="#" class="sidebar__link"><i data-feather="folder"></i><span> Administrador </span></a></li>
+    <li class="sidebar__item"><a href="#" class="sidebar__link"><i data-feather="archive"></i><span>Suporte</span></a></li>
+    <li class="sidebar__item"><a href="#" class="sidebar__link"><i data-feather="help-circle"></i><span>Sobre</span></a></li>
+    <li class="sidebar__item"><a href="#" class="sidebar__link"><i data-feather="settings"></i><span>Configurações</span></a></li>
+  </ul>
+</nav>
   </header>
 
   <!-- CONTAINER DO BOOTSTRAP + BLOCOS -->
@@ -35,14 +65,25 @@
     {% endblock %}
   </div>
 
-  <!-- JS do Bootstrap -->
-  <script 
-    src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" 
-    integrity="sha384-..." 
-    crossorigin="anonymous"></script>
-  <script 
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js" 
-    integrity="sha384-..." 
-    crossorigin="anonymous"></script>
+  <!-- jQuery (se necessário) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Feather Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+
+  <!-- Seus scripts personalizados -->
+  <script src="{% static 'script.js' %}"></script>
+
+  <script>
+      // Inicialização garantida após todo o carregamento
+      document.addEventListener('DOMContentLoaded', function() {
+          feather.replace();
+
+          // Outras inicializações...
+      });
+  </script>
 </body>
 </html>

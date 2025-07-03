@@ -4,22 +4,27 @@
 {% block content %}
 <div class="container">
     <div class="header">
-        <h1>🔔 Sistema de Sirene Escolar</h1>
+        <h1><i class="fas fa-bell"></i> Sistema de Sirene Escolar</h1>
         <p>Gerenciamento de Horários - Direção</p>
     </div>
 
     <div id="status" class="status">
-        Sistema Ativo - Próximo toque: <span id="proximo-toque">--:--</span>
+        <i class="fas fa-circle-check"></i> Sistema Ativo
+        <span id="proximo-toque" class="ms-2"></span>
     </div>
 
     <div class="content">
-        <div class="form-section">
-            <h2>➕ Agendamentos já cadastrados</h2>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-clock"></i> Agendamentos</h2>
+            <a href="{% url 'app:alarm-create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Novo Agendamento
+            </a>
+        </div>
 
-            {% if alarms %}
+        {% if alarms %}
         <div class="table-responsive">
-            <table class="table table-striped">
-                <thead class="thead-dark">
+            <table class="table table-hover">
+                <thead>
                     <tr>
                         <th>Tipo</th>
                         <th>Horário</th>
@@ -31,40 +36,72 @@
                 <tbody>
                     {% for alarm in alarms %}
                     <tr>
-                        <td>{{ alarm.get_event_type_display }}</td>
+                        <td>
+                            {% if alarm.event_type == "class_start" %}
+                                <span class="badge bg-success">{{ alarm.get_event_type_display }}</span>
+                            {% elif alarm.event_type == "class_end" %}
+                                <span class="badge bg-danger">{{ alarm.get_event_type_display }}</span>
+                            {% elif alarm.event_type == "break_start" %}
+                                <span class="badge bg-warning text-dark">{{ alarm.get_event_type_display }}</span>
+                            {% elif alarm.event_type == "break_end" %}
+                                <span class="badge bg-info text-dark">{{ alarm.get_event_type_display }}</span>
+                            {% else %}
+                                <span class="badge bg-primary">{{ alarm.get_event_type_display }}</span>
+                            {% endif %}
+                        </td>
                         <td>{{ alarm.time|time:"H:i" }}</td>
                         <td>
                             {% for day in alarm.days_of_week.split %}
-                                <span class="badge bg-primary">{{ day }}</span>
+                                {% if day == "0" %}
+                                    <span class="badge bg-secondary me-1">Seg</span>
+                                {% elif day == "1" %}
+                                    <span class="badge bg-secondary me-1">Ter</span>
+                                {% elif day == "2" %}
+                                    <span class="badge bg-secondary me-1">Qua</span>
+                                {% elif day == "3" %}
+                                    <span class="badge bg-secondary me-1">Qui</span>
+                                {% elif day == "4" %}
+                                    <span class="badge bg-secondary me-1">Sex</span>
+                                {% elif day == "5" %}
+                                    <span class="badge bg-secondary me-1">Sáb</span>
+                                {% elif day == "6" %}
+                                    <span class="badge bg-secondary me-1">Dom</span>
+                                {% else %}
+                                    <span class="badge bg-secondary me-1">{{ day }}</span>
+                                {% endif %}
                             {% endfor %}
                         </td>
-                        <td>{{ alarm.start_date|date:"d/m/Y" }} a {{ alarm.end_date|date:"d/m/Y" }}</td>
+                        <td>{{ alarm.start_date|date:"d/m/Y" }} <i class="fas fa-arrow-right mx-2"></i> {{ alarm.end_date|date:"d/m/Y" }}</td>
                         <td>
-                            <a href="{% url 'app:alarm-update' alarm.pk %}" class="btn btn-sm btn-warning">
-                                <i class="fas fa-edit"></i> Editar
-                            </a>
-                            <a href="{% url 'app:alarm-delete' alarm.pk %}" class="btn btn-sm btn-danger">
-                                <i class="fas fa-trash"></i> Excluir
-                            </a>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'app:alarm-update' alarm.pk %}" class="btn btn-sm btn-warning" data-bs-toggle="tooltip" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'app:alarm-delete' alarm.pk %}" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" title="Excluir">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-{% else %}
-    <div class="alert alert-info">
-        Nenhum agendamento ativo encontrado para hoje.
-    </div>
-{% endif %}
-            <div class="form-group mt-3">
-                <a href="{% url 'app:alarm-create' %}" class="btn">➕ Criar novo Agendamento</a>
-            </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> Nenhum agendamento ativo encontrado para hoje.
+        </div>
+        {% endif %}
+
+        <div class="text-center mt-4">
+          <form action="{% url 'app:ativar-campainha' %}" method="post">
+              {% csrf_token %}
+            <button id="sirenButton" onclick="ativarSirene()" class="btn btn-lg btn-danger">
+                <span id="sirenButtonText">Tocar Sirene</span>
+                <span id="sirenSpinner" class="spinner-border spinner-border-sm d-none ms-2" role="status"></span>
+            </button>
+          </form>
         </div>
     </div>
-<form action="{% url 'app:ativar-campainha' %}" method="post">
-  {% csrf_token %}
-    <button onclick="ativarSirene()">Ativar Sirene</button>
-</form>
 </div>
 {% endblock %}

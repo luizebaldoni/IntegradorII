@@ -1,9 +1,15 @@
+/* ============================= */
+/*        Reset e Corpo         */
+/* ============================= */
+
+/** *: Reset de margens, paddings e box model. */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+/** body: Estilização geral com fonte, fundo gradiente e padding. */
 body {
     font-family: 'Arial', sans-serif;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -11,6 +17,12 @@ body {
     padding: 20px;
 }
 
+
+/* ============================= */
+/*           Container           */
+/* ============================= */
+
+/** .container: Container centralizado com sombra, fundo branco e bordas arredondadas. */
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -20,6 +32,12 @@ body {
     overflow: hidden;
 }
 
+
+/* ============================= */
+/*            Header            */
+/* ============================= */
+
+/** .header: Cabeçalho com gradiente e texto centralizado branco. */
 .header {
     background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
     color: white;
@@ -27,36 +45,52 @@ body {
     text-align: center;
 }
 
+/** .header h1: Título principal grande. */
 .header h1 {
     font-size: 2.5em;
     margin-bottom: 10px;
 }
 
+
+/* ============================= */
+/*           Status             */
+/* ============================= */
+
+/** .status: Bloco de status em verde com texto branco e negrito. */
 .status {
     background: #27ae60;
     color: white;
     padding: 15px;
-    margin: 20px;
+    margin: 15px;
     border-radius: 10px;
     text-align: center;
     font-weight: bold;
 }
 
+/** .status.tocando: Estilo para status ativo com animação de pulsar. */
 .status.tocando {
     background: #e74c3c;
     animation: pulse 1s infinite;
 }
 
+/** @keyframes pulse: Animação de batimento. */
 @keyframes pulse {
     0% { transform: scale(1); }
     50% { transform: scale(1.05); }
     100% { transform: scale(1); }
 }
 
+
+/* ============================= */
+/*         Conteúdo e Formulário */
+/* ============================= */
+
+/** .content: Padding interno da área principal. */
 .content {
     padding: 30px;
 }
 
+/** .form-section: Seção de formulário com fundo claro e bordas suaves. */
 .form-section {
     background: #f8f9fa;
     padding: 25px;
@@ -64,12 +98,14 @@ body {
     margin-bottom: 30px;
 }
 
+/** .form-section h2: Título das seções do formulário. */
 .form-section h2 {
     color: #2c3e50;
     margin-bottom: 20px;
     font-size: 1.5em;
 }
 
+/** .form-group: Grupo de campos do formulário com flex e espaçamento. */
 .form-group {
     display: flex;
     gap: 15px;
@@ -78,12 +114,14 @@ body {
     flex-wrap: wrap;
 }
 
+/** .form-group label: Rótulo com texto em negrito e cor escura. */
 .form-group label {
     font-weight: bold;
     color: #34495e;
     min-width: 120px;
 }
 
+/** .form-group select/input: Campos de entrada com bordas arredondadas. */
 .form-group select, .form-group input {
     padding: 12px;
     border: 2px solid #ddd;
@@ -93,12 +131,19 @@ body {
     min-width: 150px;
 }
 
+/** .form-group select:focus/input:focus: Estilo de foco nos campos. */
 .form-group select:focus, .form-group input:focus {
     outline: none;
     border-color: #3498db;
     box-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
 }
 
+
+/* ============================= */
+/*            Botões            */
+/* ============================= */
+
+/** .btn: Botão principal com gradiente azul e animação. */
 .btn {
     background: linear-gradient(135deg, #3498db, #2980b9);
     color: white;
@@ -111,19 +156,28 @@ body {
     transition: all 0.3s ease;
 }
 
+/** .btn:hover: Efeito de elevação ao passar o mouse. */
 .btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
 }
 
+/** .btn-danger: Variante vermelha para ações destrutivas. */
 .btn-danger {
     background: linear-gradient(135deg, #e74c3c, #c0392b);
 }
 
+/** .btn-danger:hover: Sombra intensa para botão de perigo. */
 .btn-danger:hover {
     box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
 }
 
+
+/* ============================= */
+/*           Cards de Dias      */
+/* ============================= */
+
+/** .horarios-grid: Grade responsiva de cards. */
 .horarios-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -131,6 +185,7 @@ body {
     margin-top: 30px;
 }
 
+/** .dia-card: Estilo dos cards com sombra e borda. */
 .dia-card {
     background: white;
     border: 2px solid #ecf0f1;
@@ -139,6 +194,7 @@ body {
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
+/** .dia-card h3: Título do dia com destaque e separador. */
 .dia-card h3 {
     color: #2c3e50;
     margin-bottom: 15px;
@@ -147,6 +203,12 @@ body {
     padding-bottom: 10px;
 }
 
+
+/* ============================= */
+/*        Itens e Horários      */
+/* ============================= */
+
+/** .horario-item: Bloco de horário com borda lateral azul. */
 .horario-item {
     display: flex;
     justify-content: space-between;
@@ -158,34 +220,50 @@ body {
     border-left: 4px solid #3498db;
 }
 
+/** .horario-item:hover: Realce do horário ao passar o mouse. */
 .horario-item:hover {
     background: #e9ecef;
 }
 
+/** .horario-time: Estilo da hora destacada. */
 .horario-time {
     font-weight: bold;
     color: #2c3e50;
 }
 
+/** .horario-desc: Estilo descritivo do evento com itálico. */
 .horario-desc {
     color: #7f8c8d;
     font-style: italic;
 }
 
+
+/* ============================= */
+/*          Botão Excluir       */
+/* ============================= */
+
+/** .delete-btn: Botão pequeno vermelho para exclusão. */
 .delete-btn {
     background: #e74c3c;
     color: white;
     border: none;
     padding: 5px 10px;
     border-radius: 5px;
-    cursor: pointer;    
+    cursor: pointer;
     font-size: 12px;
 }
 
+/** .delete-btn:hover: Escurecimento no hover. */
 .delete-btn:hover {
     background: #c0392b;
 }
 
+
+/* ============================= */
+/*         Badge de Dia         */
+/* ============================= */
+
+/** .day-badge: Etiqueta pequena cinza para dia da semana. */
 .day-badge {
     display: inline-block;
     padding: 2px 6px;
@@ -194,4 +272,191 @@ body {
     color: white;
     border-radius: 3px;
     font-size: 0.8em;
+}
+
+
+/* ============================= */
+/*         Menu Lateral         */
+/* ============================= */
+
+/** .sidebar: Menu vertical fixo com estilo clean. */
+.sidebar {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: #3498db;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0);
+    padding: 10px 0;
+    width: 60px;
+    height: calc(100vh - 40px);
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+/** .sidebar__menu: Lista de itens do menu. */
+.sidebar__menu {
+    color: black;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/** .sidebar__item: Item do menu com margem vertical. */
+.sidebar__item {
+    color: white;
+    margin: 10px 0;
+    position: relative;
+}
+.sidebar__link i {
+    color: #a0a0a0; /* cor padrão */
+    transition: color 0.3s ease;
+}
+
+.sidebar__link.active i {
+    color: #3498db; /* cor quando ativo */
+}
+/* Estilo para ícones Feather */
+[data-feather] {
+    color: #ffffff; /* Cor branca para os ícones */
+    stroke: currentColor; /* Faz o SVG usar a cor do texto */
+    width: 1.2em;
+    height: 1.2em;
+    vertical-align: middle;
+}
+
+/* Estilo para ícones quando o item está ativo */
+.sidebar__link.active [data-feather] {
+    color: #3498db;
+    stroke: currentColor;
+}
+/** .sidebar__link: Link de ícone centralizado. */
+.sidebar__link {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    height: 50px;
+    color: black;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+/** .sidebar__link i: Ícone com traçado escuro. */
+.sidebar__link i {
+    color: black;
+    stroke-width: 2px;
+    width: 24px;
+    height: 24px;
+    transition: stroke 0.3s ease;
+}
+
+/** .sidebar__link span: Tooltip lateral flutuante. */
+.sidebar__link span {
+    position: absolute;
+    left: 60px;
+    white-space: nowrap;
+    background: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-10px);
+    transition: all 0.3s ease;
+    font-size: 14px;
+    color: #3498db;
+    font-weight: bold;
+}
+
+/** .sidebar__link:hover span: Exibe tooltip ao passar o mouse. */
+.sidebar__link:hover span {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.sidebar__link.active {
+    background-color: rgba(52, 152, 219, 0.1);
+    border-left: 3px solid #3498db;
+}
+
+.sidebar__link.active i {
+    stroke: #3498db;
+}
+/* Estilos para cards */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.card-body {
+    padding: 30px;
+}
+
+/* Melhorias nos botões */
+.btn-lg {
+    padding: 10px 20px;
+    font-size: 1.1rem;
+}
+
+/* Espaçamento entre ícones e texto */
+.btn i {
+    margin-right: 8px;
+}
+
+/* Estilo para alertas personalizados */
+.alert-secondary {
+    background-color: #f8f9fa;
+    border-left: 4px solid #6c757d;
+    text-align: left;
+    margin: 20px 0;
+}
+
+/* Responsividade para tabelas */
+@media (max-width: 768px) {
+    .table-responsive {
+        border: 0;
+    }
+
+    .table-responsive table {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
+    .table-responsive thead {
+        display: none;
+    }
+
+    .table-responsive tr {
+        display: block;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+    .table-responsive td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-align: right;
+        padding-left: 50%;
+        position: relative;
+        border-bottom: 1px solid #eee;
+    }
+
+    .table-responsive td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 15px;
+        width: 45%;
+        padding-right: 15px;
+        text-align: left;
+        font-weight: bold;
+    }
+
+    .btn-group {
+        display: flex;
+        justify-content: flex-end;
+    }
 }
