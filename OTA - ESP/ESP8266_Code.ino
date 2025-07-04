@@ -53,13 +53,13 @@
 #include <ArduinoOTA.h>
 
 ///// CONFIGURAÇÕES DE REDE /////
-const char* ssid = "Hidrogenio_2.4";        // SSID da rede Wi-Fi à qual o ESP8266 se conectará
-const char* password = "ceespsol";           // Senha da rede Wi-Fi
+const char* ssid = "SEU_SSID";        // SSID da rede Wi-Fi à qual o ESP8266 se conectará
+const char* password = "SUA_SENHA";           // Senha da rede Wi-Fi
 
 // Endpoints do servidor Django
-const char* scheduleUrl = "http://192.168.1.25:8000/api/comando"; // URL para verificar agendamentos
-const char* commandUrl = "http://192.168.1.25:8000/check_command/"; // URL para comandos manuais
-const char* confirmUrl = "http://192.168.1.25:8000/confirm_command/"; // URL para confirmar comando
+const char* scheduleUrl = "http://200.18.75.25:3235/api/comando"; // URL para verificar agendamentos
+const char* commandUrl = "http://200.18.75.25:3235/check_command/"; // URL para comandos manuais
+const char* confirmUrl = "http://200.18.75.25:3235/confirm_command/"; // URL para confirmar comando
 
 // Configurações de hardware
 const int sirenPin = 5;           // Pino de controle da sirene (saída digital, D1 no ESP8266)
@@ -69,7 +69,7 @@ const int statusLed = 2;          // LED interno (azul, D4 no ESP8266)
 const unsigned long scheduleCheckInterval = 60000;  // Intervalo de 1 minuto para verificar agendamentos
 const unsigned long commandCheckInterval = 5000;    // Intervalo de 5 segundos para verificar comandos manuais
 const unsigned long sirenMinDuration = 2000;        // Duração mínima da sirene (2 segundos)
-const unsigned long sirenMaxDuration = 5000;       // Duração máxima da sirene (5 segundos)
+const unsigned long sirenMaxDuration = 3500;       // Duração máxima da sirene (5 segundos)
 
 ///// VARIÁVEIS GLOBAIS /////
 WiFiUDP ntpUDP;
@@ -312,7 +312,7 @@ void confirmCommandExecution() {
 
 // ativa sirene
 void activateSiren(String source) {
-  digitalWrite(sirenPin, LOW);  // Ativa a sirene
+  digitalWrite(sirenPin, LOW);  // Ativa a sirene 
   sirenActive = true;
   sirenStartTime = millis();    // Marca o tempo de ativação
 
