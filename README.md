@@ -791,8 +791,7 @@ curl -X POST http://localhost:8000/ativar/   -H "Content-Type: application/json"
 
 ---
 
-## 📜 Licença
+## 📜 Contato
 
-MIT License - Consulte o arquivo LICENSE para detalhes.
+- oliveira.luize@acad.ufsm.br (desenvolvedora de integração)
 
-Documentação completa disponível em `/docs/`.

@@ -24,6 +24,8 @@ body {
 
 /** .container: Container centralizado com sombra, fundo branco e bordas arredondadas. */
 .container {
+    margin-left: 80px; /* Espaço para a sidebar */
+    min-height: calc(100vh - 40px); /* Mesma altura que a sidebar */
     max-width: 1200px;
     margin: 0 auto;
     background: white;
@@ -296,6 +298,7 @@ body {
 
 /** .sidebar__menu: Lista de itens do menu sem estilos de lista. */
 .sidebar__menu {
+    height: calc(100vh - 40px);
     list-style: none;
     padding: 0;
     margin: 0;
