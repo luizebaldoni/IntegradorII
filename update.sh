@@ -13,6 +13,7 @@ git pull
 
 # Aplicar migrações do Django
 echo "🛠️ Rodando migrações..."
+python manage.py makemigrations
 python manage.py migrate
 
 # Reiniciar o serviço systemd (sem senha, configurado via sudoers)
