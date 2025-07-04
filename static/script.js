@@ -1,26 +1,46 @@
 function ativarSirene() {
-    fetch('/ativar/', {
+    const btn = document.getElementById('sirenButton');
+    const btnText = document.getElementById('sirenButtonText');
+    const spinner = document.getElementById('sirenSpinner');
+
+    // Desabilita o botão durante o processamento
+    btn.disabled = true;
+    btnText.textContent = "Enviando...";
+    spinner.classList.remove('d-none');
+
+    fetch("/ativar/", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': '{{ csrf_token }}'
         },
         body: JSON.stringify({
-            duration: 30,
+            duration: 30,  // 30 segundos de duração
             source: 'web_interface'
         })
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Erro na resposta do servidor');
+        }
+        return response.json();
+    })
     .then(data => {
         console.log('Sucesso:', data);
-        alert('Sirene ativada com sucesso!');
+        btnText.textContent = "Sirene acionada!";
+        setTimeout(() => {
+            btnText.textContent = "Tocar Sirene";
+            spinner.classList.add('d-none');
+            btn.disabled = false;
+        }, 3000);
     })
     .catch(error => {
         console.error('Erro:', error);
-        alert('Erro ao ativar sirene');
+        btnText.textContent = "Erro! Tentar novamente";
+        spinner.classList.add('d-none');
+        btn.disabled = false;
     });
 }
-
 // Estrutura para armazenar os horários
 let horarios = {};
  // Função para carregar os agendamentos via API
@@ -53,35 +73,6 @@ function carregarHorarios() {
     }
     atualizarInterface();
 }
-function triggerSiren() {
-  const btnText = document.getElementById('sirenButtonText');
-  const spinner = document.getElementById('sirenSpinner');
-
-  btnText.textContent = "Enviando...";
-  spinner.classList.remove('d-none');
-
-  fetch("{% url 'app:ativar-campainha' %}", {
-    method: 'POST',
-    headers: {
-      'X-CSRFToken': '{{ csrf_token }}',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({source: 'manual'})
-  })
-  .then(response => response.json())
-  .then(data => {
-    btnText.textContent = "Sirene acionada!";
-    setTimeout(() => {
-      btnText.textContent = "Tocar Sirene";
-      spinner.classList.add('d-none');
-    }, 3000);
-  })
-  .catch(error => {
-    btnText.textContent = "Erro! Tentar novamente";
-    spinner.classList.add('d-none');
-  });
-}
-
 // Salvar horários no localStorage
 function salvarHorarios() {
     localStorage.setItem('horariosEscola', JSON.stringify(horarios));

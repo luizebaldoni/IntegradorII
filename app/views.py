@@ -43,114 +43,137 @@ DAYS_MAP = {
 		}
 
 
+
+# ========================================================
+# ENDPOINT PRINCIPAL PARA CONSULTA DA ESP
+# ========================================================
+
 @csrf_exempt
 def comando_esp(request):
-	if request.method != 'GET':
-		return JsonResponse({'error': 'Método não permitido'}, status = 405)
-	
-	try:
-		now = timezone.localtime(timezone.now())
-		weekday_en = now.strftime('%a')
-		weekday_pt = DAYS_MAP.get(weekday_en, weekday_en)
-		current_time = now.time()
-		
-		# Verifica agendamentos ativos
-		agendamentos = AlarmSchedule.objects.filter(
-				start_date__lte = now.date(),
-				end_date__gte = now.date(),
-				days_of_week__contains = weekday_pt,
-				active = True
-				).order_by('time')
-		
-		# Verifica se há agendamento no horário atual
-		should_activate = False
-		for ag in agendamentos:
-			if (ag.time.hour == current_time.hour and
-					ag.time.minute == current_time.minute):
-				should_activate = True
-				break
-		
-		# Verifica comandos manuais pendentes
-		manual_command = ComandoESP.objects.filter(comando = 'ligar').first()
-		
-		response_data = {
-				'current_time': now.strftime('%H:%M'),
-				'current_day': weekday_pt,
-				'should_activate': should_activate or (manual_command is not None),
-				'is_scheduled': should_activate and not manual_command,
-				'sirene_status': SirenStatus.objects.first().is_on if SirenStatus.objects.exists() else False,
-				'next_alarm': None
-				}
-		
-		# Encontra próximo agendamento
-		for ag in agendamentos:
-			if ag.time > current_time:
-				response_data['next_alarm'] = ag.time.strftime('%H:%M')
-				break
-		
-		return JsonResponse(response_data)
-	
-	except Exception as e:
-		return JsonResponse({'error': str(e)}, status = 500)
+    """
+    Endpoint que retorna JSON com o comando 'ligar' ou 'desligar' baseado no
+    horário atual e na presença de agendamento ou comando manual.
+
+    Retorna:
+    - current_time: hora atual formatada
+    - current_day: dia da semana
+    - should_activate: True se deve ativar a sirene
+    - is_scheduled: True se é por agendamento (não manual)
+    - sirene_status: status atual da sirene
+    - next_alarm: horário do próximo alarme (se houver)
+    """
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Método não permitido'}, status=405)
+
+    try:
+        now = timezone.localtime(timezone.now())
+        weekday_en = now.strftime('%a')
+        weekday_pt = DAYS_MAP.get(weekday_en, weekday_en)
+        current_time = now.time()
+
+        # Consulta alarmes válidos
+        agendamentos = AlarmSchedule.objects.filter(
+            start_date__lte=now.date(),
+            end_date__gte=now.date(),
+            days_of_week__contains=weekday_pt,
+            active=True
+        ).order_by('time')
+
+        # Verifica se há alarme para o horário atual
+        should_activate = any(
+            ag.time.hour == current_time.hour and ag.time.minute == current_time.minute
+            for ag in agendamentos
+        )
+
+        # Verifica comandos manuais pendentes
+        manual_command = ComandoESP.objects.filter(comando='ligar').first()
+
+        response_data = {
+            'current_time': now.strftime('%H:%M'),
+            'current_day': weekday_pt,
+            'should_activate': should_activate or (manual_command is not None),
+            'is_scheduled': should_activate and not manual_command,
+            'sirene_status': SirenStatus.objects.first().is_on if SirenStatus.objects.exists() else False,
+            'next_alarm': None
+        }
+
+        # Próximo alarme após o horário atual
+        for ag in agendamentos:
+            if ag.time > current_time:
+                response_data['next_alarm'] = ag.time.strftime('%H:%M')
+                break
+
+        return JsonResponse(response_data)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+# ========================================================
+# ATIVAÇÃO MANUAL DA CAMPANHA
+# ========================================================
 
 @csrf_exempt
 def ativar_campainha(request):
-	if request.method == 'POST':
-		try:
-			data = json.loads(request.body)
-			duration = data.get('duration', 3)  # Default 3 segundos
-			
-			# Cria/Atualiza o comando
-			comando = ComandoESP.objects.update_or_create(
-					id = 1,
-					defaults = {
-							'comando': 'ligar',
-							'source': data.get('source', 'manual'),
-							'timestamp': timezone.now()
-							}
-					)
-	
-			# Atualiza status
-			SirenStatus.objects.update_or_create(
-					id = 1,
-					defaults = {
-							'is_on': True,
-							'last_activated': timezone.now(),
-							'activation_source': data.get('source', 'manual')
-							}
-					)
-			return JsonResponse({
-					'status': 'success',
-					'command_id': comando[0].id,
-					'duration': duration,
-					'timestamp': timezone.now().isoformat()
-					})
-		except Exception as e:
-			return JsonResponse({'status': 'error', 'message': str(e)}, status = 500)
-	return JsonResponse({'status': 'error', 'message': 'Método não permitido'}, status = 405)
+    """
+    Endpoint para ativar a sirene manualmente via POST.
+    Cria entrada de comando no banco e atualiza status da sirene.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Método não permitido'}, status=405)
 
+    try:
+        ComandoESP.objects.all().delete()
+        ComandoESP.objects.create(comando='ligar', source='web')
 
+        status = SirenStatus.objects.first() or SirenStatus()
+        status.is_on = True
+        status.save()
+
+        return JsonResponse({'status': 'success'})
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+# ========================================================
+# VERIFICAÇÃO DO COMANDO PENDENTE PARA A ESP
+# ========================================================
+
+@csrf_exempt
 def check_command(request):
+    """
+    Retorna o comando atual ("ligar" ou "desligar") para a ESP.
+    """
     comando = ComandoESP.objects.first()
-    if comando and comando.comando == 'ligar':
-        response = {
-            'command': 'ligar',
-            'source': comando.source,
-		    'id': str(comando.id)
-        }
-        return JsonResponse(response)
-    return JsonResponse({'command': 'desligar'})
+
+    if not comando or comando.comando != 'ligar':
+        return JsonResponse({'command': 'desligar'})
+
+    source = getattr(comando, 'source', 'manual') or 'manual'
+
+    return JsonResponse({
+        'command': 'ligar',
+        'source': source,
+        'id': str(comando.id)
+    })
+
+# ========================================================
+# CONFIRMAÇÃO DE EXECUÇÃO DO COMANDO PELA ESP
+# ========================================================
 
 @csrf_exempt
 def confirm_command(request):
+    """
+    Endpoint chamado pela ESP para confirmar execução do comando.
+    Reseta o comando para 'desligar'.
+    """
     if request.method == 'POST':
         comando = ComandoESP.objects.first()
         if comando:
             comando.comando = 'desligar'
             comando.save()
         return JsonResponse({'status': 'success'})
-    return JsonResponse({'status': 'error'}, status=400)
 
+    return JsonResponse({'status': 'error'}, status=400)
 @csrf_exempt
 def update_alarm(request):
     if request.method == 'POST':

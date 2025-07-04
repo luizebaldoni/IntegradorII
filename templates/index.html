@@ -95,7 +95,6 @@
 
         <div class="text-center mt-4">
           <form action="{% url 'app:ativar-campainha' %}" method="post">
-              {% csrf_token %}
             <button id="sirenButton" onclick="ativarSirene()" class="btn btn-lg btn-danger">
                 <span id="sirenButtonText">Tocar Sirene</span>
                 <span id="sirenSpinner" class="spinner-border spinner-border-sm d-none ms-2" role="status"></span>
